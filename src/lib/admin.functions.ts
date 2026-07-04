@@ -290,7 +290,8 @@ export const getAllSettings = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     await admin(context);
     const { data } = await context.supabase.from("settings").select("key, value");
-    return JSON.parse(JSON.stringify(data ?? [])) as Array<{ key: string; value: unknown }>;
+    // Serialize value as JSON string to keep the RPC return type serializable.
+    return (data ?? []).map((r) => ({ key: r.key, valueJson: JSON.stringify(r.value) }));
   });
 
 export const updateSetting = createServerFn({ method: "POST" })
