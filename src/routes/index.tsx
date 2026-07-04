@@ -1,24 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
+// Route entry — the auth gate redirects to /auth if unsigned, otherwise
+// the library route (_authenticated/index) renders.
 export const Route = createFileRoute("/")({
-  component: Index,
+  beforeLoad: async () => {
+    // Client-side session check happens on _authenticated; index route just
+    // redirects to /library which is under _authenticated.
+    throw redirect({ to: "/library" });
+  },
 });
-
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
