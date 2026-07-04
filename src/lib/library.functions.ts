@@ -50,7 +50,8 @@ export const syncAdminEmails = createServerFn({ method: "POST" }).handler(async 
 export const getPaletteSetting = createServerFn({ method: "GET" }).handler(async () => {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data } = await supabaseAdmin.from("settings").select("value").eq("key", "palette").maybeSingle();
-  return { palette: (data?.value as unknown) ?? "ocean" };
+  const raw = data?.value;
+  return { palette: typeof raw === "string" ? raw : "ocean" };
 });
 
 // Library page for approved viewers.
