@@ -290,9 +290,7 @@ export const getAllSettings = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     await admin(context);
     const { data } = await context.supabase.from("settings").select("key, value");
-    const map: Record<string, unknown> = {};
-    for (const r of data ?? []) map[r.key] = r.value;
-    return map;
+    return (data ?? []) as Array<{ key: string; value: unknown }>;
   });
 
 export const updateSetting = createServerFn({ method: "POST" })
