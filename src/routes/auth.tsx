@@ -27,9 +27,12 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: redirect ?? "/" });
+      if (data.session) {
+        const target = redirect && redirect.startsWith("/") && !redirect.startsWith("//") ? redirect : "/";
+        window.location.href = target;
+      }
     });
-  }, [navigate, redirect]);
+  }, [redirect]);
 
   async function afterSignedIn() {
     // Sync ADMIN_EMAILS in case this email should be admin
