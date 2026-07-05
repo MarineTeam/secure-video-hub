@@ -34,7 +34,9 @@ function AuthPage() {
   async function afterSignedIn() {
     // Sync ADMIN_EMAILS in case this email should be admin
     try { await syncAdminEmails(); } catch { /* ignore */ }
-    navigate({ to: redirect ?? "/" });
+    const target = redirect && redirect.startsWith("/") && !redirect.startsWith("//") ? redirect : "/";
+    // Use full navigation so relative same-origin OAuth-consent paths run their loaders.
+    window.location.href = target;
   }
 
   async function submit(e: React.FormEvent) {
