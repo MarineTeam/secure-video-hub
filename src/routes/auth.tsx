@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
@@ -18,7 +18,6 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
-  const navigate = useNavigate();
   const { redirect } = useSearch({ from: "/auth" });
   const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
   const [email, setEmail] = useState("");
@@ -27,14 +26,19 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: redirect ?? "/" });
+      if (data.session) {
+        const target = redirect && redirect.startsWith("/") && !redirect.startsWith("//") ? redirect : "/";
+        window.location.href = target;
+      }
     });
-  }, [navigate, redirect]);
+  }, [redirect]);
 
   async function afterSignedIn() {
     // Sync ADMIN_EMAILS in case this email should be admin
     try { await syncAdminEmails(); } catch { /* ignore */ }
-    navigate({ to: redirect ?? "/" });
+    const target = redirect && redirect.startsWith("/") && !redirect.startsWith("//") ? redirect : "/";
+    // Use full navigation so relative same-origin OAuth-consent paths run their loaders.
+    window.location.href = target;
   }
 
   async function submit(e: React.FormEvent) {
@@ -42,10 +46,11 @@ function AuthPage() {
     setBusy(true);
     try {
       if (mode === "signup") {
+        const returnQs = redirect ? `?redirect=${encodeURIComponent(redirect)}` : "";
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/auth` },
+          options: { emailRedirectTo: `${window.location.origin}/auth${returnQs}` },
         });
         if (error) throw error;
         toast.success("Check your inbox to confirm your email.");
@@ -70,7 +75,10 @@ function AuthPage() {
 
   async function google() {
     setBusy(true);
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/auth" });
+    const returnQs = redirect ? `?redirect=${encodeURIComponent(redirect)}` : "";
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin + "/auth" + returnQs,
+    });
     if ("error" in result && result.error) {
       toast.error(String(result.error));
       setBusy(false);
