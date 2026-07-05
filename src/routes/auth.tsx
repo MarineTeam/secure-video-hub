@@ -47,10 +47,11 @@ function AuthPage() {
     setBusy(true);
     try {
       if (mode === "signup") {
+        const returnQs = redirect ? `?redirect=${encodeURIComponent(redirect)}` : "";
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/auth` },
+          options: { emailRedirectTo: `${window.location.origin}/auth${returnQs}` },
         });
         if (error) throw error;
         toast.success("Check your inbox to confirm your email.");
