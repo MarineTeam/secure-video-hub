@@ -1,9 +1,10 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getSessionState } from "@/lib/library.functions";
-import { Film, LogOut, Settings, Video } from "lucide-react";
+import { Film, History, ListMusic, LogOut, Rss, Settings, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { NotificationsBell } from "@/components/notifications-bell";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -34,23 +35,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Link>
           <nav className="flex items-center gap-1">
             {session?.isApproved && (
-              <Button asChild variant="ghost" size="sm">
-                <Link to="/">
-                  <Video className="mr-1.5 h-4 w-4" /> Library
-                </Link>
-              </Button>
+              <>
+                <Button asChild variant="ghost" size="sm"><Link to="/"><Video className="mr-1.5 h-4 w-4" /> Library</Link></Button>
+                <Button asChild variant="ghost" size="sm"><Link to="/playlists"><ListMusic className="mr-1.5 h-4 w-4" /> Playlists</Link></Button>
+                <Button asChild variant="ghost" size="sm"><Link to="/subscriptions"><Rss className="mr-1.5 h-4 w-4" /> Subscriptions</Link></Button>
+                <Button asChild variant="ghost" size="sm"><Link to="/history"><History className="mr-1.5 h-4 w-4" /> History</Link></Button>
+                <NotificationsBell />
+              </>
             )}
             {session?.isAdmin && (
-              <Button asChild variant="ghost" size="sm">
-                <Link to="/admin">
-                  <Settings className="mr-1.5 h-4 w-4" /> Admin
-                </Link>
-              </Button>
+              <Button asChild variant="ghost" size="sm"><Link to="/admin"><Settings className="mr-1.5 h-4 w-4" /> Admin</Link></Button>
             )}
             <div className="mx-2 hidden text-xs text-muted-foreground md:block">{session?.email}</div>
-            <Button variant="ghost" size="sm" onClick={signOut}>
-              <LogOut className="h-4 w-4" />
-            </Button>
+            <Button variant="ghost" size="sm" onClick={signOut}><LogOut className="h-4 w-4" /></Button>
           </nav>
         </div>
       </header>
