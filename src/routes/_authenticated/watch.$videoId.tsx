@@ -5,6 +5,8 @@ import { IdleTimeout } from "@/components/theme-provider";
 import { ResumablePlayer } from "@/components/resumable-player";
 import { getSignedEmbed, getMyProgress, saveProgress } from "@/lib/watch.functions";
 import { ChevronLeft } from "lucide-react";
+import { VideoActions } from "@/components/video-actions";
+import { CommentsSection } from "@/components/comments-section";
 
 export const Route = createFileRoute("/_authenticated/watch/$videoId")({
   component: WatchPage,
@@ -43,6 +45,8 @@ function WatchPage() {
               saveProgress({ data: { videoId, position, duration } }).catch(() => {});
             }}
           />
+          <VideoActions videoId={videoId} />
+          <CommentsSection videoId={videoId} />
         </>
       )}
     </AppShell>
