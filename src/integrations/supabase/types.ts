@@ -68,6 +68,35 @@ export type Database = {
         }
         Relationships: []
       }
+      collection_subscriptions: {
+        Row: {
+          collection_id: string
+          created_at: string
+          notify: boolean
+          user_id: string
+        }
+        Insert: {
+          collection_id: string
+          created_at?: string
+          notify?: boolean
+          user_id: string
+        }
+        Update: {
+          collection_id?: string
+          created_at?: string
+          notify?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_subscriptions_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collections: {
         Row: {
           created_at: string
@@ -86,6 +115,101 @@ export type Database = {
           created_by?: string | null
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          bunny_video_id: string | null
+          collection_id: string | null
+          created_at: string
+          id: string
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          bunny_video_id?: string | null
+          collection_id?: string | null
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          bunny_video_id?: string | null
+          collection_id?: string | null
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      playlist_items: {
+        Row: {
+          added_at: string
+          bunny_video_id: string
+          playlist_id: string
+          position: number
+        }
+        Insert: {
+          added_at?: string
+          bunny_video_id: string
+          playlist_id: string
+          position?: number
+        }
+        Update: {
+          added_at?: string
+          bunny_video_id?: string
+          playlist_id?: string
+          position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playlist_items_playlist_id_fkey"
+            columns: ["playlist_id"]
+            isOneToOne: false
+            referencedRelation: "playlists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      playlists: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_watch_later: boolean
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_watch_later?: boolean
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_watch_later?: boolean
+          name?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -184,6 +308,65 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      video_comments: {
+        Row: {
+          body: string
+          bunny_video_id: string
+          created_at: string
+          deleted: boolean
+          id: string
+          parent_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          bunny_video_id: string
+          created_at?: string
+          deleted?: boolean
+          id?: string
+          parent_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          bunny_video_id?: string
+          created_at?: string
+          deleted?: boolean
+          id?: string
+          parent_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "video_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_likes: {
+        Row: {
+          bunny_video_id: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          bunny_video_id: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          bunny_video_id?: string
+          created_at?: string
           user_id?: string
         }
         Relationships: []
