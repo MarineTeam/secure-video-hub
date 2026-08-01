@@ -47,6 +47,19 @@ function LibraryPage() {
     queryFn: () => getLibraryPage({ data: { q: q || undefined, collectionId, page } }),
     enabled: session?.isApproved === true,
   });
+  const trending = useQuery({
+    queryKey: ["trending"],
+    queryFn: () => getTrending({ data: { days: 30, limit: 8 } }),
+    enabled: session?.isApproved === true,
+    retry: false,
+  });
+  const libIds = (lib.data?.items ?? []).map((v) => v.id);
+  const counts = useQuery({
+    queryKey: ["view-counts", libIds],
+    queryFn: () => getViewCounts({ data: { ids: libIds } }),
+    enabled: libIds.length > 0,
+    retry: false,
+  });
 
   if (!session) {
     return <AppShell><div className="p-8 text-center text-sm text-muted-foreground">Loading…</div></AppShell>;
