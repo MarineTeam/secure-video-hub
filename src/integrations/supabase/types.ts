@@ -406,6 +406,27 @@ export type Database = {
           },
         ]
       }
+      video_views: {
+        Row: {
+          bunny_video_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          bunny_video_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          bunny_video_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       watch_progress: {
         Row: {
           bunny_video_id: string
@@ -443,6 +464,20 @@ export type Database = {
         Returns: boolean
       }
       is_approved_viewer: { Args: never; Returns: boolean }
+      top_videos: {
+        Args: { _days?: number; _limit?: number }
+        Returns: {
+          bunny_video_id: string
+          views: number
+        }[]
+      }
+      video_view_counts: {
+        Args: { _ids: string[] }
+        Returns: {
+          bunny_video_id: string
+          views: number
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "user"

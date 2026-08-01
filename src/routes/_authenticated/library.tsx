@@ -4,9 +4,15 @@ import { useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { IdleTimeout } from "@/components/theme-provider";
 import { getLibraryPage, listCollectionsForViewer, getContinueWatching, getSessionState } from "@/lib/library.functions";
+import { getTrending, getViewCounts } from "@/lib/engagement.functions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Play } from "lucide-react";
+import { Search, Play, Flame, Eye } from "lucide-react";
+
+function formatViews(n: number) {
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}K views`;
+  return `${n} view${n === 1 ? "" : "s"}`;
+}
 
 export const Route = createFileRoute("/_authenticated/library")({
   component: LibraryPage,
@@ -40,6 +46,19 @@ function LibraryPage() {
     queryKey: ["library", q, collectionId, page],
     queryFn: () => getLibraryPage({ data: { q: q || undefined, collectionId, page } }),
     enabled: session?.isApproved === true,
+  });
+  const trending = useQuery({
+    queryKey: ["trending"],
+    queryFn: () => getTrending({ data: { days: 30, limit: 8 } }),
+    enabled: session?.isApproved === true,
+    retry: false,
+  });
+  const libIds = (lib.data?.items ?? []).map((v) => v.id);
+  const counts = useQuery({
+    queryKey: ["view-counts", libIds],
+    queryFn: () => getViewCounts({ data: { ids: libIds } }),
+    enabled: libIds.length > 0,
+    retry: false,
   });
 
   if (!session) {
@@ -86,6 +105,27 @@ function LibraryPage() {
           </section>
         )}
 
+        {trending.data && trending.data.length > 0 && (
+          <section>
+            <h2 className="mb-3 flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+              <Flame className="h-4 w-4 text-primary" /> Trending this month
+            </h2>
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6">
+              {trending.data.map((v) => (
+                <Link key={v.id} to="/watch/$videoId" params={{ videoId: v.id }} className="group">
+                  <div className="relative aspect-video overflow-hidden rounded-lg glass transition-transform group-hover:scale-[1.02]">
+                    {v.thumbnail ? <img src={v.thumbnail} alt={v.title} loading="lazy" className="h-full w-full object-cover" /> : null}
+                    <span className="absolute bottom-1 right-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-white">{formatViews(v.views)}</span>
+                  </div>
+                  <div className="mt-1 line-clamp-1 text-xs">{v.title}</div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+
+
         <section>
           <div className="mb-4 flex flex-wrap items-center gap-2">
             <div className="relative flex-1 min-w-[220px]">
@@ -121,6 +161,9 @@ function LibraryPage() {
                   </div>
                 </div>
                 <div className="mt-2 line-clamp-2 text-sm">{v.title}</div>
+                <div className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <Eye className="h-3 w-3" /> {formatViews(counts.data?.[v.id] ?? 0)}
+                </div>
               </Link>
             ))}
           </div>
