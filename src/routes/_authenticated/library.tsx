@@ -161,6 +161,9 @@ function LibraryPage() {
                   </div>
                 </div>
                 <div className="mt-2 line-clamp-2 text-sm">{v.title}</div>
+                <div className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <Eye className="h-3 w-3" /> {formatViews(counts.data?.[v.id] ?? 0)}
+                </div>
               </Link>
             ))}
           </div>
