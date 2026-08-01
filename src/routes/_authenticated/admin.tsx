@@ -72,6 +72,24 @@ function VideosTab() {
     onSuccess: (r) => { toast.success(`Synced ${r.count} videos.`); qc.invalidateQueries({ queryKey: ["admin-videos"] }); },
     onError: (e) => toast.error((e as Error).message),
   });
+  const cleanup = useMutation({
+    mutationFn: async () => {
+      const preview = await cleanupDeletedVideos({ data: { dryRun: true } });
+      if (preview.orphans.length === 0) return { removed: 0 };
+      const list = preview.orphans.slice(0, 10).map((o) => `• ${o.title || o.id}`).join("\n");
+      const more = preview.orphans.length > 10 ? `\n…and ${preview.orphans.length - 10} more` : "";
+      if (!window.confirm(`Remove ${preview.orphans.length} video(s) no longer in bunny.net?\n\n${list}${more}`)) {
+        return { removed: -1 };
+      }
+      return cleanupDeletedVideos({ data: {} });
+    },
+    onSuccess: (r) => {
+      if (r.removed === -1) return;
+      toast.success(r.removed === 0 ? "Nothing to clean up." : `Removed ${r.removed} deleted video(s).`);
+      qc.invalidateQueries({ queryKey: ["admin-videos"] });
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
   const del = useMutation({
     mutationFn: (id: string) => deleteVideo({ data: { id } }),
     onSuccess: () => { toast.success("Deleted."); qc.invalidateQueries({ queryKey: ["admin-videos"] }); },
