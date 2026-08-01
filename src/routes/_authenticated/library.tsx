@@ -4,9 +4,15 @@ import { useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { IdleTimeout } from "@/components/theme-provider";
 import { getLibraryPage, listCollectionsForViewer, getContinueWatching, getSessionState } from "@/lib/library.functions";
+import { getTrending, getViewCounts } from "@/lib/engagement.functions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Play } from "lucide-react";
+import { Search, Play, Flame, Eye } from "lucide-react";
+
+function formatViews(n: number) {
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}K views`;
+  return `${n} view${n === 1 ? "" : "s"}`;
+}
 
 export const Route = createFileRoute("/_authenticated/library")({
   component: LibraryPage,
