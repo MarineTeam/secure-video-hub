@@ -5,7 +5,7 @@ import { AppShell } from "@/components/app-shell";
 import { IdleTimeout } from "@/components/theme-provider";
 import { getSessionState } from "@/lib/library.functions";
 import {
-  listAdminVideos, syncBunnyLibrary, renameVideo, deleteVideo, setVideoCollection, createTusUpload,
+  listAdminVideos, syncBunnyLibrary, cleanupDeletedVideos, renameVideo, deleteVideo, setVideoCollection, createTusUpload,
   listCollections, createCollection, deleteCollection,
   listViewers, addViewers, removeViewer,
   listShares, createShare, revokeShare,
