@@ -5,7 +5,7 @@ import { AppShell } from "@/components/app-shell";
 import { IdleTimeout } from "@/components/theme-provider";
 import { getSessionState } from "@/lib/library.functions";
 import {
-  listAdminVideos, syncBunnyLibrary, renameVideo, deleteVideo, setVideoCollection, createTusUpload,
+  listAdminVideos, syncBunnyLibrary, cleanupDeletedVideos, renameVideo, deleteVideo, setVideoCollection, createTusUpload,
   listCollections, createCollection, deleteCollection,
   listViewers, addViewers, removeViewer,
   listShares, createShare, revokeShare,
@@ -72,6 +72,24 @@ function VideosTab() {
     onSuccess: (r) => { toast.success(`Synced ${r.count} videos.`); qc.invalidateQueries({ queryKey: ["admin-videos"] }); },
     onError: (e) => toast.error((e as Error).message),
   });
+  const cleanup = useMutation({
+    mutationFn: async () => {
+      const preview = await cleanupDeletedVideos({ data: { dryRun: true } });
+      if (preview.orphans.length === 0) return { removed: 0 };
+      const list = preview.orphans.slice(0, 10).map((o) => `• ${o.title || o.id}`).join("\n");
+      const more = preview.orphans.length > 10 ? `\n…and ${preview.orphans.length - 10} more` : "";
+      if (!window.confirm(`Remove ${preview.orphans.length} video(s) no longer in bunny.net?\n\n${list}${more}`)) {
+        return { removed: -1 };
+      }
+      return cleanupDeletedVideos({ data: {} });
+    },
+    onSuccess: (r) => {
+      if (r.removed === -1) return;
+      toast.success(r.removed === 0 ? "Nothing to clean up." : `Removed ${r.removed} deleted video(s).`);
+      qc.invalidateQueries({ queryKey: ["admin-videos"] });
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
   const del = useMutation({
     mutationFn: (id: string) => deleteVideo({ data: { id } }),
     onSuccess: () => { toast.success("Deleted."); qc.invalidateQueries({ queryKey: ["admin-videos"] }); },
@@ -132,6 +150,7 @@ function VideosTab() {
         <div className="mb-3 flex items-center gap-2">
           <h3 className="font-medium">Upload</h3>
           <Button variant="ghost" size="sm" onClick={() => sync.mutate()} disabled={sync.isPending}>Sync from bunny.net</Button>
+          <Button variant="ghost" size="sm" onClick={() => cleanup.mutate()} disabled={cleanup.isPending}>Clean up deleted</Button>
         </div>
         <div className="flex flex-wrap items-end gap-2">
           <div className="flex-1 min-w-[200px]">

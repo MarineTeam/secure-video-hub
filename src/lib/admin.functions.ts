@@ -59,6 +59,45 @@ export const syncBunnyLibrary = createServerFn({ method: "POST" })
     return { count: items.length };
   });
 
+// Remove local records for videos that no longer exist in bunny.net.
+export const cleanupDeletedVideos = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ dryRun: z.boolean().optional() }).parse(d ?? {}))
+  .handler(async ({ data, context }) => {
+    const { audit } = await admin(context);
+    const { bunnyListVideos } = await import("@/lib/bunny.server");
+
+    const live = new Set<string>();
+    for (let page = 1; page <= 20; page++) {
+      const { items } = await bunnyListVideos({ page, itemsPerPage: 500 });
+      items.forEach((v) => live.add(v.guid));
+      if (items.length < 500) break;
+    }
+    if (live.size === 0) throw new Error("bunny.net returned no videos — refusing to clean up.");
+
+    const { data: meta } = await context.supabase.from("video_metadata").select("bunny_video_id, title");
+    const orphans = (meta ?? []).filter((m) => !live.has(m.bunny_video_id));
+    if (data.dryRun) {
+      return { removed: 0, orphans: orphans.map((o) => ({ id: o.bunny_video_id, title: o.title })) };
+    }
+    if (orphans.length === 0) return { removed: 0, orphans: [] };
+
+    const ids = orphans.map((o) => o.bunny_video_id);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("playlist_items").delete().in("bunny_video_id", ids);
+    await supabaseAdmin.from("video_likes").delete().in("bunny_video_id", ids);
+    await supabaseAdmin.from("video_comments").delete().in("bunny_video_id", ids);
+    await supabaseAdmin.from("watch_progress").delete().in("bunny_video_id", ids);
+    await supabaseAdmin.from("notifications").delete().in("bunny_video_id", ids);
+    await supabaseAdmin.from("share_links").delete().in("bunny_video_id", ids);
+    const { error } = await supabaseAdmin.from("video_metadata").delete().in("bunny_video_id", ids);
+    if (error) throw error;
+
+    await audit("videos.cleanup", undefined, { count: ids.length, ids });
+    return { removed: ids.length, orphans: orphans.map((o) => ({ id: o.bunny_video_id, title: o.title })) };
+  });
+
+
 export const renameVideo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({ id: z.string(), title: z.string().min(1).max(300) }).parse(d))
