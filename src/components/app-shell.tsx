@@ -10,6 +10,7 @@ import { NotificationsBell } from "@/components/notifications-bell";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
   const qc = useQueryClient();
   const { data: session } = useQuery({
     queryKey: ["session-state"],
