@@ -150,6 +150,7 @@ function VideosTab() {
         <div className="mb-3 flex items-center gap-2">
           <h3 className="font-medium">Upload</h3>
           <Button variant="ghost" size="sm" onClick={() => sync.mutate()} disabled={sync.isPending}>Sync from bunny.net</Button>
+          <Button variant="ghost" size="sm" onClick={() => cleanup.mutate()} disabled={cleanup.isPending}>Clean up deleted</Button>
         </div>
         <div className="flex flex-wrap items-end gap-2">
           <div className="flex-1 min-w-[200px]">
