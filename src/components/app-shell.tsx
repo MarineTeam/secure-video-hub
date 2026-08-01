@@ -1,8 +1,10 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { getSessionState } from "@/lib/library.functions";
-import { Film, History, ListMusic, LogOut, Rss, Settings, Video } from "lucide-react";
+import { Film, History, ListMusic, LogOut, Menu, Rss, Settings, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { NotificationsBell } from "@/components/notifications-bell";
 
