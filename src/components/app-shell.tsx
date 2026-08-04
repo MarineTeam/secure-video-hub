@@ -2,11 +2,13 @@ import { Link, useRouter } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { getSessionState } from "@/lib/library.functions";
-import { Film, History, ListMusic, LogOut, Menu, Rss, Settings, Video } from "lucide-react";
+import { Film, History, ListMusic, LogOut, Menu, Rss, Settings, User, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { NotificationsBell } from "@/components/notifications-bell";
+import { CommandPalette } from "@/components/command-palette";
+
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -73,6 +75,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       <Button asChild variant="ghost" className="justify-start" onClick={() => setMenuOpen(false)}><Link to="/playlists"><ListMusic className="mr-2 h-4 w-4" /> Playlists</Link></Button>
                       <Button asChild variant="ghost" className="justify-start" onClick={() => setMenuOpen(false)}><Link to="/subscriptions"><Rss className="mr-2 h-4 w-4" /> Subscriptions</Link></Button>
                       <Button asChild variant="ghost" className="justify-start" onClick={() => setMenuOpen(false)}><Link to="/history"><History className="mr-2 h-4 w-4" /> History</Link></Button>
+                      <Button asChild variant="ghost" className="justify-start" onClick={() => setMenuOpen(false)}><Link to="/settings"><User className="mr-2 h-4 w-4" /> Profile</Link></Button>
+
                     </>
                   )}
                   {session?.isAdmin && (
