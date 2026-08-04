@@ -19,7 +19,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { PALETTES, applyPalette, paletteFromValue } from "@/lib/theme";
-import { Trash2, Upload, Share2, Plus } from "lucide-react";
+import { Trash2, Upload, Share2, Plus, Download } from "lucide-react";
+import { downloadCsv } from "@/lib/csv";
+
 import * as tus from "tus-js-client";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
 
@@ -299,7 +301,24 @@ function ViewersTab() {
         <Button className="mt-2" onClick={() => add.mutate()} disabled={!bulk.trim() || add.isPending}>Add</Button>
       </div>
       <div className="glass rounded-xl p-4">
-        <h3 className="mb-2 font-medium">Approved viewers</h3>
+        <div className="mb-2 flex items-center justify-between">
+          <h3 className="font-medium">Approved viewers</h3>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!viewers.data?.length}
+            onClick={() =>
+              downloadCsv(
+                `approved-viewers-${new Date().toISOString().slice(0, 10)}.csv`,
+                (viewers.data ?? []).map((v) => ({ email: v.email, added_at: v.added_at, last_seen_at: v.last_seen_at ?? "" })),
+                ["email", "added_at", "last_seen_at"],
+              )
+            }
+          >
+            <Download className="mr-1.5 h-4 w-4" /> Export CSV
+          </Button>
+        </div>
+
         <div className="divide-y">
           {(viewers.data ?? []).map((v) => (
             <div key={v.id} className="flex items-center justify-between py-2 text-sm">

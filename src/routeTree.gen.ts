@@ -16,6 +16,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as STokenRouteImport } from './routes/s.$token'
 import { Route as AuthenticatedSubscriptionsRouteImport } from './routes/_authenticated/subscriptions'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedPlaylistsRouteImport } from './routes/_authenticated/playlists'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
@@ -62,6 +63,11 @@ const AuthenticatedSubscriptionsRoute =
     path: '/subscriptions',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPlaylistsRoute = AuthenticatedPlaylistsRouteImport.update({
   id: '/playlists',
   path: '/playlists',
@@ -129,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/history': typeof AuthenticatedHistoryRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/playlists': typeof AuthenticatedPlaylistsRouteWithChildren
+  '/settings': typeof AuthenticatedSettingsRoute
   '/subscriptions': typeof AuthenticatedSubscriptionsRoute
   '/s/$token': typeof STokenRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -147,6 +154,7 @@ export interface FileRoutesByTo {
   '/history': typeof AuthenticatedHistoryRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/playlists': typeof AuthenticatedPlaylistsRouteWithChildren
+  '/settings': typeof AuthenticatedSettingsRoute
   '/subscriptions': typeof AuthenticatedSubscriptionsRoute
   '/s/$token': typeof STokenRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -167,6 +175,7 @@ export interface FileRoutesById {
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
   '/_authenticated/playlists': typeof AuthenticatedPlaylistsRouteWithChildren
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/subscriptions': typeof AuthenticatedSubscriptionsRoute
   '/s/$token': typeof STokenRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -187,6 +196,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/library'
     | '/playlists'
+    | '/settings'
     | '/subscriptions'
     | '/s/$token'
     | '/.lovable/oauth/consent'
@@ -205,6 +215,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/library'
     | '/playlists'
+    | '/settings'
     | '/subscriptions'
     | '/s/$token'
     | '/.lovable/oauth/consent'
@@ -224,6 +235,7 @@ export interface FileRouteTypes {
     | '/_authenticated/history'
     | '/_authenticated/library'
     | '/_authenticated/playlists'
+    | '/_authenticated/settings'
     | '/_authenticated/subscriptions'
     | '/s/$token'
     | '/.lovable/oauth/consent'
@@ -294,6 +306,13 @@ declare module '@tanstack/react-router' {
       path: '/subscriptions'
       fullPath: '/subscriptions'
       preLoaderRoute: typeof AuthenticatedSubscriptionsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/playlists': {
@@ -388,6 +407,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
   AuthenticatedPlaylistsRoute: typeof AuthenticatedPlaylistsRouteWithChildren
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSubscriptionsRoute: typeof AuthenticatedSubscriptionsRoute
   AuthenticatedWatchVideoIdRoute: typeof AuthenticatedWatchVideoIdRoute
 }
@@ -397,6 +417,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
   AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
   AuthenticatedPlaylistsRoute: AuthenticatedPlaylistsRouteWithChildren,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSubscriptionsRoute: AuthenticatedSubscriptionsRoute,
   AuthenticatedWatchVideoIdRoute: AuthenticatedWatchVideoIdRoute,
 }

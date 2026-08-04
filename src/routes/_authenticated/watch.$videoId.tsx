@@ -12,8 +12,11 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { VideoActions } from "@/components/video-actions";
 import { CommentsSection } from "@/components/comments-section";
+import { ShareVideo } from "@/components/share-video";
+
 
 export const Route = createFileRoute("/_authenticated/watch/$videoId")({
+  validateSearch: (search: Record<string, unknown>): { t?: number } => ({ t: Number(search["t"]) || undefined }),
   component: WatchPage,
 });
 
@@ -22,10 +25,14 @@ const THEATER_KEY = "mvp:theater";
 
 function WatchPage() {
   const { videoId } = Route.useParams();
+  const { t } = Route.useSearch();
+  const startAt = t ?? 0;
   const navigate = useNavigate();
   const [autoplay, setAutoplay] = useState(false);
   const [theater, setTheater] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [currentTime, setCurrentTime] = useState(0);
+
 
   useEffect(() => {
     setAutoplay(localStorage.getItem(AUTOPLAY_KEY) === "1");
@@ -134,6 +141,7 @@ function WatchPage() {
                   />
                   <Label htmlFor="autoplay" className="text-xs text-muted-foreground">Autoplay next</Label>
                 </div>
+                <ShareVideo videoId={videoId} currentTime={currentTime} />
                 <Button variant="ghost" size="sm" onClick={toggleTheater} title="Theater mode (T)">
                   <Monitor className="mr-1 h-4 w-4" /> {theater ? "Exit theater" : "Theater"}
                 </Button>
@@ -141,12 +149,14 @@ function WatchPage() {
             </div>
             <ResumablePlayer
               src={embed.data.url}
-              initialSeconds={Number(prog.data?.position_seconds ?? 0)}
+              initialSeconds={startAt > 0 ? startAt : Number(prog.data?.position_seconds ?? 0)}
               onProgress={(position, duration) => {
+                setCurrentTime(position);
                 saveProgress({ data: { videoId, position, duration } }).catch(() => {});
               }}
               onEnded={onEnded}
             />
+
             {countdown !== null && nextVideo && (
               <div className="mt-3 flex flex-wrap items-center justify-between gap-3 glass rounded-xl p-3 text-sm">
                 <span className="flex items-center gap-2">
