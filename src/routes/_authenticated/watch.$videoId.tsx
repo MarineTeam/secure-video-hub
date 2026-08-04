@@ -14,6 +14,7 @@ import { VideoActions } from "@/components/video-actions";
 import { CommentsSection } from "@/components/comments-section";
 
 export const Route = createFileRoute("/_authenticated/watch/$videoId")({
+  validateSearch: (search: Record<string, unknown>) => ({ t: Number(search["t"]) || 0 }),
   component: WatchPage,
 });
 
@@ -22,10 +23,13 @@ const THEATER_KEY = "mvp:theater";
 
 function WatchPage() {
   const { videoId } = Route.useParams();
+  const { t: startAt } = Route.useSearch();
   const navigate = useNavigate();
   const [autoplay, setAutoplay] = useState(false);
   const [theater, setTheater] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [currentTime, setCurrentTime] = useState(0);
+
 
   useEffect(() => {
     setAutoplay(localStorage.getItem(AUTOPLAY_KEY) === "1");
