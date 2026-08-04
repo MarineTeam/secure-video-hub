@@ -65,19 +65,31 @@ export const listComments = createServerFn({ method: "POST" })
       .eq("bunny_video_id", data.videoId)
       .order("created_at", { ascending: true })
       .limit(500);
-    // Resolve emails via admin listUsers (best-effort cache).
+    // Resolve display names: prefer profile display_name, fall back to email.
     const userIds = Array.from(new Set((rows ?? []).map((r) => r.user_id)));
     const emailMap = new Map<string, string>();
+    const nameMap = new Map<string, string>();
+    const avatarMap = new Map<string, string>();
     if (userIds.length) {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, display_name, avatar_url")
+        .in("id", userIds);
+      for (const p of profiles ?? []) {
+        if (p.display_name) nameMap.set(p.id, p.display_name);
+        if (p.avatar_url) avatarMap.set(p.id, p.avatar_url);
+      }
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { data: users } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
       for (const u of users?.users ?? []) if (u.email) emailMap.set(u.id, u.email);
     }
     return (rows ?? []).map((r) => ({
       ...r,
-      author: emailMap.get(r.user_id) ?? "Viewer",
+      author: nameMap.get(r.user_id) ?? emailMap.get(r.user_id) ?? "Viewer",
+      avatar: avatarMap.get(r.user_id) ?? null,
       body: r.deleted ? "[deleted]" : r.body,
     }));
+
   });
 
 export const addComment = createServerFn({ method: "POST" })
