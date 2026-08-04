@@ -108,7 +108,29 @@ export const getLibraryPage = createServerFn({ method: "POST" })
     return { items, total: count ?? items.length, perPage, page: data.page };
   });
 
+// Lightweight title search for the command palette.
+export const searchVideos = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ q: z.string().max(200) }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { assertApprovedViewer } = await import("@/lib/admin.server");
+    await assertApprovedViewer(context.supabase);
+    const term = data.q.trim();
+    if (term.length < 2) return [] as { id: string; title: string; collection: string | null }[];
+    const { data: rows } = await context.supabase
+      .from("video_metadata")
+      .select("bunny_video_id, title, collections(name)")
+      .ilike("title", `%${term}%`)
+      .limit(12);
+    return (rows ?? []).map((r) => ({
+      id: r.bunny_video_id,
+      title: r.title,
+      collection: (r as unknown as { collections?: { name: string } }).collections?.name ?? null,
+    }));
+  });
+
 export const listCollectionsForViewer = createServerFn({ method: "GET" })
+
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { assertApprovedViewer } = await import("@/lib/admin.server");
