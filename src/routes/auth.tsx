@@ -13,6 +13,8 @@ import { syncAdminEmails } from "@/lib/library.functions";
 const search = z.object({ redirect: z.string().optional() });
 
 export const Route = createFileRoute("/auth")({
+  // Client-only: this screen reads the browser Supabase session on mount.
+  ssr: false,
   validateSearch: search,
   component: AuthPage,
 });

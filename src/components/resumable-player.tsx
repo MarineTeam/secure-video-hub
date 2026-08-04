@@ -7,12 +7,17 @@ export function ResumablePlayer({
   src,
   initialSeconds,
   onProgress,
+  onEnded,
 }: {
   src: string;
   initialSeconds?: number;
   onProgress?: (position: number, duration: number) => void;
+  onEnded?: () => void;
 }) {
   const ref = useRef<HTMLIFrameElement>(null);
+  const endedRef = useRef(onEnded);
+  endedRef.current = onEnded;
+
   useEffect(() => {
     const iframe = ref.current;
     if (!iframe) return;
@@ -34,6 +39,10 @@ export function ResumablePlayer({
           if (now - lastSent < 5000) return;
           lastSent = now;
           onProgress(e.seconds, e.duration);
+        });
+        player.on("ended", () => {
+          if (cancelled) return;
+          endedRef.current?.();
         });
       } catch (err) {
         console.warn("player init failed", err);
