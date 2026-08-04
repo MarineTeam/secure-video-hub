@@ -8,6 +8,9 @@ import { getTrending, getViewCounts } from "@/lib/engagement.functions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Play, Flame, Eye } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+type SortKey = "recent" | "views" | "title" | "longest";
 
 function formatViews(n: number) {
   if (n >= 1000) return `${(n / 1000).toFixed(1)}K views`;
@@ -31,6 +34,7 @@ function LibraryPage() {
   const [q, setQ] = useState("");
   const [collectionId, setCollectionId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [sort, setSort] = useState<SortKey>("recent");
 
   const cols = useQuery({
     queryKey: ["collections-viewer"],
@@ -79,6 +83,13 @@ function LibraryPage() {
       </AppShell>
     );
   }
+
+  const sortedItems = [...(lib.data?.items ?? [])].sort((a, b) => {
+    if (sort === "views") return (counts.data?.[b.id] ?? 0) - (counts.data?.[a.id] ?? 0);
+    if (sort === "title") return a.title.localeCompare(b.title);
+    if (sort === "longest") return (b.length ?? 0) - (a.length ?? 0);
+    return 0;
+  });
 
   const totalPages = lib.data ? Math.max(1, Math.ceil(lib.data.total / lib.data.perPage)) : 1;
 
@@ -138,6 +149,17 @@ function LibraryPage() {
                 <Button key={c.id} variant={collectionId === c.id ? "default" : "outline"} size="sm" onClick={() => { setCollectionId(c.id); setPage(1); }}>{c.name}</Button>
               ))}
             </div>
+            <Select value={sort} onValueChange={(v) => setSort(v as SortKey)}>
+              <SelectTrigger className="w-[160px]" aria-label="Sort videos">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="recent">Newest first</SelectItem>
+                <SelectItem value="views">Most viewed</SelectItem>
+                <SelectItem value="title">Title A–Z</SelectItem>
+                <SelectItem value="longest">Longest</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {lib.isLoading && <div className="py-16 text-center text-sm text-muted-foreground">Loading…</div>}
@@ -145,7 +167,7 @@ function LibraryPage() {
             <div className="py-16 text-center text-sm text-muted-foreground">No videos found.</div>
           )}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {(lib.data?.items ?? []).map((v) => (
+            {sortedItems.map((v) => (
               <Link key={v.id} to="/watch/$videoId" params={{ videoId: v.id }} className="group">
                 <div className="relative aspect-video overflow-hidden rounded-lg glass transition-transform group-hover:scale-[1.02]">
                   {v.thumbnail ? (
