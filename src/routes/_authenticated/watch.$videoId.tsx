@@ -16,7 +16,7 @@ import { ShareVideo } from "@/components/share-video";
 
 
 export const Route = createFileRoute("/_authenticated/watch/$videoId")({
-  validateSearch: (search: Record<string, unknown>) => ({ t: Number(search["t"]) || 0 }),
+  validateSearch: (search: Record<string, unknown>): { t?: number } => ({ t: Number(search["t"]) || undefined }),
   component: WatchPage,
 });
 
