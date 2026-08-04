@@ -25,7 +25,8 @@ const THEATER_KEY = "mvp:theater";
 
 function WatchPage() {
   const { videoId } = Route.useParams();
-  const { t: startAt } = Route.useSearch();
+  const { t } = Route.useSearch();
+  const startAt = t ?? 0;
   const navigate = useNavigate();
   const [autoplay, setAutoplay] = useState(false);
   const [theater, setTheater] = useState(false);
