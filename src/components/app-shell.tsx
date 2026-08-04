@@ -39,13 +39,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <nav className="hidden items-center gap-1 lg:flex">
             {session?.isApproved && (
               <>
+                <CommandPalette />
                 <Button asChild variant="ghost" size="sm"><Link to="/"><Video className="mr-1.5 h-4 w-4" /> Library</Link></Button>
                 <Button asChild variant="ghost" size="sm"><Link to="/playlists"><ListMusic className="mr-1.5 h-4 w-4" /> Playlists</Link></Button>
                 <Button asChild variant="ghost" size="sm"><Link to="/subscriptions"><Rss className="mr-1.5 h-4 w-4" /> Subscriptions</Link></Button>
                 <Button asChild variant="ghost" size="sm"><Link to="/history"><History className="mr-1.5 h-4 w-4" /> History</Link></Button>
+                <Button asChild variant="ghost" size="sm" aria-label="Profile settings"><Link to="/settings"><User className="h-4 w-4" /></Link></Button>
                 <NotificationsBell />
               </>
             )}
+
             {session?.isAdmin && (
               <Button asChild variant="ghost" size="sm"><Link to="/admin"><Settings className="mr-1.5 h-4 w-4" /> Admin</Link></Button>
             )}
