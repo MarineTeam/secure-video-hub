@@ -5,7 +5,9 @@ import { addComment, deleteComment, listComments } from "@/lib/social.functions"
 import { getSessionState } from "@/lib/library.functions";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
+
 
 type Comment = Awaited<ReturnType<typeof listComments>>[number];
 
@@ -37,10 +39,17 @@ export function CommentsSection({ videoId }: { videoId: string }) {
     <div key={c.id} className={depth ? "ml-6 border-l pl-3" : ""}>
       <div className="glass rounded-lg p-3">
         <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
-          <span>{c.author}</span>
+          <span className="flex items-center gap-1.5">
+            <Avatar className="h-5 w-5">
+              {c.avatar ? <AvatarImage src={c.avatar} alt="" /> : null}
+              <AvatarFallback className="text-[9px]">{c.author.slice(0, 2).toUpperCase()}</AvatarFallback>
+            </Avatar>
+            {c.author}
+          </span>
           <span>{new Date(c.created_at).toLocaleString()}</span>
         </div>
         <div className={`whitespace-pre-wrap text-sm ${c.deleted ? "italic text-muted-foreground" : ""}`}>{c.body}</div>
+
         {!c.deleted && (
           <div className="mt-2 flex gap-1">
             <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => setReplyTo(replyTo === c.id ? null : c.id)}>
