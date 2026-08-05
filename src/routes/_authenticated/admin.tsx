@@ -202,6 +202,7 @@ function VideosTab() {
                 </td>
                 <td className="p-2 text-xs">{v.views}</td>
                 <td className="p-2 text-right">
+                  <ChaptersButton videoId={v.id} title={v.title} />
                   <ShareForVideoButton videoId={v.id} />
                   <Button variant="ghost" size="sm" onClick={() => { if (confirm(`Delete "${v.title}"?`)) del.mutate(v.id); }}>
                     <Trash2 className="h-4 w-4 text-destructive" />
@@ -215,6 +216,59 @@ function VideosTab() {
     </div>
   );
 }
+
+function ChaptersButton({ videoId, title }: { videoId: string; title: string }) {
+  const [open, setOpen] = useState(false);
+  const [text, setText] = useState("");
+  const loaded = useQuery({
+    queryKey: ["admin-chapters", videoId],
+    queryFn: () => listChapters({ data: { videoId } }),
+    enabled: open,
+  });
+  useEffect(() => {
+    if (loaded.data) {
+      setText(
+        loaded.data
+          .map((c) => `${Math.floor(c.start / 60)}:${String(Math.floor(c.start % 60)).padStart(2, "0")} ${c.label}`)
+          .join("\n"),
+      );
+    }
+  }, [loaded.data]);
+  const save = useMutation({
+    mutationFn: () => {
+      const chapters = text
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => {
+          const m = line.match(/^(?:(\d+):)?(\d+):(\d{1,2})\s+(.+)$/);
+          if (!m) throw new Error(`Bad line: "${line}" — use "1:23 Chapter title"`);
+          const start = Number(m[1] ?? 0) * 3600 + Number(m[2]) * 60 + Number(m[3]);
+          return { label: m[4]!, start };
+        });
+      return saveChapters({ data: { videoId, chapters } });
+    },
+    onSuccess: (r) => { toast.success(`Saved ${r.count} chapter(s).`); setOpen(false); },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  return (
+    <>
+      <Button variant="ghost" size="sm" onClick={() => setOpen(true)} title="Chapters">
+        <ListOrdered className="h-4 w-4" />
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Chapters — {title}</DialogTitle></DialogHeader>
+          <p className="text-xs text-muted-foreground">One per line: <code>0:00 Intro</code></p>
+          <Textarea rows={8} value={text} onChange={(e) => setText(e.target.value)} placeholder={"0:00 Intro\n2:15 Safety checks"} />
+          <Button onClick={() => save.mutate()} disabled={save.isPending} className="gradient-brand text-primary-foreground">Save chapters</Button>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
 
 function ShareForVideoButton({ videoId }: { videoId: string }) {
   const [open, setOpen] = useState(false);
