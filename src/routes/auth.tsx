@@ -94,8 +94,11 @@ function AuthPage() {
     }
   }
 
+  if (!mounted) return null;
+
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
+
       <div className="glass w-full max-w-md rounded-2xl p-8">
         <div className="mb-6 flex items-center gap-2">
           <div className="rounded-md gradient-brand p-2">
