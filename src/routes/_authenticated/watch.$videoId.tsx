@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { IdleTimeout } from "@/components/theme-provider";
-import { ResumablePlayer } from "@/components/resumable-player";
+import { ResumablePlayer, type PlayerApi } from "@/components/resumable-player";
+import { listChapters } from "@/lib/chapters.functions";
 import { getSignedEmbed, getMyProgress, saveProgress } from "@/lib/watch.functions";
 import { recordView, getRelatedVideos, getViewCounts } from "@/lib/engagement.functions";
 import { ChevronLeft, Eye, Monitor, PlayCircle } from "lucide-react";
@@ -22,6 +23,13 @@ export const Route = createFileRoute("/_authenticated/watch/$videoId")({
 
 const AUTOPLAY_KEY = "mvp:autoplay-next";
 const THEATER_KEY = "mvp:theater";
+const SPEED_KEY = "mvp:speed";
+
+function fmt(s: number) {
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return `${m}:${String(sec).padStart(2, "0")}`;
+}
 
 function WatchPage() {
   const { videoId } = Route.useParams();
@@ -32,12 +40,15 @@ function WatchPage() {
   const [theater, setTheater] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
-
+  const [speed, setSpeed] = useState(1);
+  const playerRef = useRef<PlayerApi | null>(null);
 
   useEffect(() => {
     setAutoplay(localStorage.getItem(AUTOPLAY_KEY) === "1");
     setTheater(localStorage.getItem(THEATER_KEY) === "1");
+    setSpeed(Number(localStorage.getItem(SPEED_KEY)) || 1);
   }, []);
+
 
   const embed = useQuery({
     queryKey: ["embed", videoId],
@@ -57,6 +68,11 @@ function WatchPage() {
   const views = useQuery({
     queryKey: ["views", videoId],
     queryFn: () => getViewCounts({ data: { ids: [videoId] } }),
+    retry: false,
+  });
+  const chapters = useQuery({
+    queryKey: ["chapters", videoId],
+    queryFn: () => listChapters({ data: { videoId } }),
     retry: false,
   });
 
@@ -142,6 +158,21 @@ function WatchPage() {
                   <Label htmlFor="autoplay" className="text-xs text-muted-foreground">Autoplay next</Label>
                 </div>
                 <ShareVideo videoId={videoId} currentTime={currentTime} />
+                <select
+                  aria-label="Playback speed"
+                  className="rounded-md border bg-transparent px-2 py-1 text-xs text-muted-foreground"
+                  value={speed}
+                  onChange={(e) => {
+                    const r = Number(e.target.value);
+                    setSpeed(r);
+                    localStorage.setItem(SPEED_KEY, String(r));
+                    playerRef.current?.setRate(r);
+                  }}
+                >
+                  {[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((r) => (
+                    <option key={r} value={r}>{r}x</option>
+                  ))}
+                </select>
                 <Button variant="ghost" size="sm" onClick={toggleTheater} title="Theater mode (T)">
                   <Monitor className="mr-1 h-4 w-4" /> {theater ? "Exit theater" : "Theater"}
                 </Button>
@@ -155,7 +186,30 @@ function WatchPage() {
                 saveProgress({ data: { videoId, position, duration } }).catch(() => {});
               }}
               onEnded={onEnded}
+              onReady={(api) => {
+                playerRef.current = api;
+                if (speed !== 1) api.setRate(speed);
+              }}
             />
+
+            {(chapters.data ?? []).length > 0 && (
+              <div className="mt-3 glass rounded-xl p-3">
+                <h2 className="mb-2 text-xs font-medium text-muted-foreground">Chapters</h2>
+                <div className="flex flex-wrap gap-2">
+                  {(chapters.data ?? []).map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => playerRef.current?.seek(c.start)}
+                      className="rounded-md border px-2 py-1 text-xs hover:bg-muted"
+                    >
+                      <span className="font-mono text-muted-foreground">{fmt(c.start)}</span> {c.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
 
             {countdown !== null && nextVideo && (
               <div className="mt-3 flex flex-wrap items-center justify-between gap-3 glass rounded-xl p-3 text-sm">

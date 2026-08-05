@@ -188,8 +188,10 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          is_public: boolean
           is_watch_later: boolean
           name: string
+          share_token: string | null
           updated_at: string
           user_id: string
         }
@@ -197,8 +199,10 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_public?: boolean
           is_watch_later?: boolean
           name: string
+          share_token?: string | null
           updated_at?: string
           user_id: string
         }
@@ -206,8 +210,10 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_public?: boolean
           is_watch_later?: boolean
           name?: string
+          share_token?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -336,6 +342,33 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      video_chapters: {
+        Row: {
+          bunny_video_id: string
+          created_at: string
+          id: string
+          label: string
+          start_seconds: number
+          updated_at: string
+        }
+        Insert: {
+          bunny_video_id: string
+          created_at?: string
+          id?: string
+          label: string
+          start_seconds?: number
+          updated_at?: string
+        }
+        Update: {
+          bunny_video_id?: string
+          created_at?: string
+          id?: string
+          label?: string
+          start_seconds?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -491,6 +524,17 @@ export type Database = {
         Returns: boolean
       }
       is_approved_viewer: { Args: never; Returns: boolean }
+      public_playlist: {
+        Args: { _token: string }
+        Returns: {
+          bunny_video_id: string
+          item_position: number
+          playlist_description: string
+          playlist_id: string
+          playlist_name: string
+          title: string
+        }[]
+      }
       top_videos: {
         Args: { _days?: number; _limit?: number }
         Returns: {

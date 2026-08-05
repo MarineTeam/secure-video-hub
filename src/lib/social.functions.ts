@@ -214,7 +214,7 @@ export const getPlaylist = createServerFn({ method: "POST" })
     const { bunnySignedThumbnailUrl } = await import("@/lib/bunny.server");
     const { data: p, error } = await context.supabase
       .from("playlists")
-      .select("id, name, description, is_watch_later, user_id")
+      .select("id, name, description, is_watch_later, user_id, is_public, share_token")
       .eq("id", data.id)
       .single();
     if (error) throw new Error(error.message);
@@ -269,6 +269,76 @@ export const removeFromPlaylist = createServerFn({ method: "POST" })
       .eq("bunny_video_id", data.videoId);
     return { ok: true };
   });
+
+// Persist a new ordering for a playlist (owner only, enforced by RLS).
+export const reorderPlaylist = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({ playlistId: z.string().uuid(), order: z.array(vid).max(500) }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    for (let i = 0; i < data.order.length; i++) {
+      await context.supabase
+        .from("playlist_items")
+        .update({ position: i })
+        .eq("playlist_id", data.playlistId)
+        .eq("bunny_video_id", data.order[i]!);
+    }
+    return { ok: true };
+  });
+
+// Toggle public sharing; returns the share token when public.
+export const setPlaylistSharing = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ playlistId: z.string().uuid(), isPublic: z.boolean() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: existing } = await context.supabase
+      .from("playlists")
+      .select("share_token")
+      .eq("id", data.playlistId)
+      .single();
+    const token = data.isPublic ? existing?.share_token ?? crypto.randomUUID().replace(/-/g, "") : existing?.share_token ?? null;
+    const { error } = await context.supabase
+      .from("playlists")
+      .update({ is_public: data.isPublic, share_token: token })
+      .eq("id", data.playlistId);
+    if (error) throw new Error(error.message);
+    return { isPublic: data.isPublic, token: data.isPublic ? token : null };
+  });
+
+// Public read of a shared playlist — no auth required.
+export const getPublicPlaylist = createServerFn({ method: "POST" })
+  .inputValidator((d) => z.object({ token: z.string().min(8).max(64) }).parse(d))
+  .handler(async ({ data }) => {
+    const { createClient } = await import("@supabase/supabase-js");
+    const key = process.env["SUPABASE_PUBLISHABLE_KEY"] ?? process.env["SUPABASE_ANON_KEY"]!;
+    const client = createClient(process.env["SUPABASE_URL"]!, key, {
+      auth: { persistSession: false },
+      global: {
+        fetch: (input, init) => {
+          const h = new Headers(init?.headers);
+          if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization");
+          h.set("apikey", key);
+          return fetch(input, { ...init, headers: h });
+        },
+      },
+    });
+    const { data: rows, error } = await client.rpc("public_playlist", { _token: data.token });
+    if (error) throw new Error(error.message);
+    const list = (rows ?? []) as {
+      playlist_name: string;
+      playlist_description: string | null;
+      bunny_video_id: string;
+      title: string;
+    }[];
+    if (!list.length) return { name: null, description: null, items: [] };
+    return {
+      name: list[0]!.playlist_name,
+      description: list[0]!.playlist_description,
+      items: list.map((r) => ({ id: r.bunny_video_id, title: r.title })),
+    };
+  });
+
 
 export const toggleWatchLater = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

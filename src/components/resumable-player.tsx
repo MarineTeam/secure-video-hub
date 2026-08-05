@@ -3,20 +3,29 @@ import { useEffect, useRef } from "react";
 // @ts-expect-error - player.js has no types
 import Player from "player.js";
 
+export type PlayerApi = {
+  seek: (seconds: number) => void;
+  setRate: (rate: number) => void;
+};
+
 export function ResumablePlayer({
   src,
   initialSeconds,
   onProgress,
   onEnded,
+  onReady,
 }: {
   src: string;
   initialSeconds?: number;
   onProgress?: (position: number, duration: number) => void;
   onEnded?: () => void;
+  onReady?: (api: PlayerApi) => void;
 }) {
   const ref = useRef<HTMLIFrameElement>(null);
   const endedRef = useRef(onEnded);
   endedRef.current = onEnded;
+  const readyRef = useRef(onReady);
+  readyRef.current = onReady;
 
   useEffect(() => {
     const iframe = ref.current;
@@ -31,6 +40,24 @@ export function ResumablePlayer({
           if (initialSeconds && initialSeconds > 3) {
             player.setCurrentTime(initialSeconds);
           }
+          readyRef.current?.({
+            seek: (seconds: number) => {
+              try {
+                player.setCurrentTime(seconds);
+                player.play();
+              } catch {
+                /* player not ready */
+              }
+            },
+            setRate: (rate: number) => {
+              try {
+                // Not all embeds expose playback rate; ignore when missing.
+                player.setPlaybackRate?.(rate);
+              } catch {
+                /* unsupported */
+              }
+            },
+          });
         });
         player.on("timeupdate", (e: { seconds: number; duration: number }) => {
           if (!onProgress) return;
