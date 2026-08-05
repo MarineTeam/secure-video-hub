@@ -214,7 +214,7 @@ export const getPlaylist = createServerFn({ method: "POST" })
     const { bunnySignedThumbnailUrl } = await import("@/lib/bunny.server");
     const { data: p, error } = await context.supabase
       .from("playlists")
-      .select("id, name, description, is_watch_later, user_id")
+      .select("id, name, description, is_watch_later, user_id, is_public, share_token")
       .eq("id", data.id)
       .single();
     if (error) throw new Error(error.message);
