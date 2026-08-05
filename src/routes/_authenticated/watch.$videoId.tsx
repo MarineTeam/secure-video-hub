@@ -23,6 +23,13 @@ export const Route = createFileRoute("/_authenticated/watch/$videoId")({
 
 const AUTOPLAY_KEY = "mvp:autoplay-next";
 const THEATER_KEY = "mvp:theater";
+const SPEED_KEY = "mvp:speed";
+
+function fmt(s: number) {
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return `${m}:${String(sec).padStart(2, "0")}`;
+}
 
 function WatchPage() {
   const { videoId } = Route.useParams();
@@ -33,12 +40,15 @@ function WatchPage() {
   const [theater, setTheater] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
-
+  const [speed, setSpeed] = useState(1);
+  const playerRef = useRef<PlayerApi | null>(null);
 
   useEffect(() => {
     setAutoplay(localStorage.getItem(AUTOPLAY_KEY) === "1");
     setTheater(localStorage.getItem(THEATER_KEY) === "1");
+    setSpeed(Number(localStorage.getItem(SPEED_KEY)) || 1);
   }, []);
+
 
   const embed = useQuery({
     queryKey: ["embed", videoId],
