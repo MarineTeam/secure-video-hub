@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
 import { IdleTimeout } from "@/components/theme-provider";
@@ -19,8 +19,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { PALETTES, applyPalette, paletteFromValue } from "@/lib/theme";
-import { Trash2, Upload, Share2, Plus, Download } from "lucide-react";
+import { Trash2, Upload, Share2, Plus, Download, ListOrdered } from "lucide-react";
 import { downloadCsv } from "@/lib/csv";
+import { listChapters, saveChapters } from "@/lib/chapters.functions";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 import * as tus from "tus-js-client";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
