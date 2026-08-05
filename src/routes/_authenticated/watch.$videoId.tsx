@@ -70,6 +70,11 @@ function WatchPage() {
     queryFn: () => getViewCounts({ data: { ids: [videoId] } }),
     retry: false,
   });
+  const chapters = useQuery({
+    queryKey: ["chapters", videoId],
+    queryFn: () => listChapters({ data: { videoId } }),
+    retry: false,
+  });
 
   const logged = useRef<string | null>(null);
   useEffect(() => {
