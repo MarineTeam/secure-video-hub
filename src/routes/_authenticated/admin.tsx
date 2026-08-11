@@ -112,6 +112,9 @@ function VideosTab() {
 
   const [uploading, setUploading] = useState<{ name: string; progress: number } | null>(null);
   const [uploadTitle, setUploadTitle] = useState("");
+  const [selected, setSelected] = useState<string[]>([]);
+  const [filter, setFilter] = useState("");
+
 
   async function onFile(file: File) {
     const title = uploadTitle.trim() || file.name.replace(/\.[^.]+$/, "");
