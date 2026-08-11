@@ -112,6 +112,9 @@ function VideosTab() {
 
   const [uploading, setUploading] = useState<{ name: string; progress: number } | null>(null);
   const [uploadTitle, setUploadTitle] = useState("");
+  const [selected, setSelected] = useState<string[]>([]);
+  const [filter, setFilter] = useState("");
+
 
   async function onFile(file: File) {
     const title = uploadTitle.trim() || file.name.replace(/\.[^.]+$/, "");
@@ -146,6 +149,33 @@ function VideosTab() {
   }
 
   const collections = videos.data?.collections ?? [];
+  const allVideos = videos.data?.videos ?? [];
+  const rows = filter.trim()
+    ? allVideos.filter((v) => v.title.toLowerCase().includes(filter.trim().toLowerCase()))
+    : allVideos;
+  const selectedSet = new Set(selected);
+  const allSelected = rows.length > 0 && rows.every((v) => selectedSet.has(v.id));
+
+  function toggle(id: string) {
+    setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
+  }
+  function toggleAll() {
+    setSelected(allSelected ? [] : rows.map((v) => v.id));
+  }
+  async function bulkCollection(collectionId: string | null) {
+    for (const id of selected) await setVideoCollection({ data: { id, collectionId } });
+    toast.success(`Updated ${selected.length} video(s).`);
+    setSelected([]);
+    qc.invalidateQueries({ queryKey: ["admin-videos"] });
+  }
+  async function bulkDelete() {
+    if (!confirm(`Delete ${selected.length} video(s)? This removes them from bunny.net too.`)) return;
+    for (const id of selected) await deleteVideo({ data: { id } });
+    toast.success(`Deleted ${selected.length} video(s).`);
+    setSelected([]);
+    qc.invalidateQueries({ queryKey: ["admin-videos"] });
+  }
+
 
   return (
     <div className="mt-4 space-y-4">
@@ -174,15 +204,76 @@ function VideosTab() {
         )}
       </div>
 
+      <div className="glass rounded-xl p-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <Input
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            placeholder="Filter videos…"
+            className="h-8 w-full max-w-xs text-sm"
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() =>
+              downloadCsv(
+                "videos.csv",
+                rows.map((v) => ({
+                  id: v.id,
+                  title: v.title,
+                  collection: collections.find((c) => c.id === v.collectionId)?.name ?? "",
+                  views: v.views,
+                  status: v.status === 4 ? "ready" : "encoding",
+                })),
+              )
+            }
+          >
+            <Download className="mr-1.5 h-4 w-4" /> Export CSV
+          </Button>
+          {selected.length > 0 && (
+            <>
+              <span className="text-xs text-muted-foreground">{selected.length} selected</span>
+              <select
+                defaultValue=""
+                onChange={(e) => { const val = e.target.value; e.currentTarget.value = ""; bulkCollection(val === "__none" ? null : val); }}
+                className="rounded bg-muted px-2 py-1 text-xs"
+              >
+                <option value="" disabled>Move to collection…</option>
+                <option value="__none">— No collection —</option>
+                {collections.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+              <Button variant="ghost" size="sm" onClick={bulkDelete}>
+                <Trash2 className="mr-1.5 h-4 w-4 text-destructive" /> Delete selected
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => setSelected([])}>Clear</Button>
+            </>
+          )}
+        </div>
+      </div>
+
       <div className="glass overflow-x-auto rounded-xl p-2">
         <table className="w-full text-sm">
           <thead className="text-left text-xs text-muted-foreground">
-            <tr><th className="p-2">Title</th><th className="p-2">Status</th><th className="p-2">Collection</th><th className="p-2">Views</th><th className="p-2"></th></tr>
+            <tr>
+              <th className="p-2 w-8">
+                <input type="checkbox" aria-label="Select all videos" checked={allSelected} onChange={toggleAll} />
+              </th>
+              <th className="p-2">Title</th><th className="p-2">Status</th><th className="p-2">Collection</th><th className="p-2">Views</th><th className="p-2"></th>
+            </tr>
           </thead>
           <tbody>
-            {(videos.data?.videos ?? []).map((v) => (
+            {rows.map((v) => (
               <tr key={v.id} className="border-t border-border/50">
                 <td className="p-2">
+                  <input
+                    type="checkbox"
+                    aria-label={`Select ${v.title}`}
+                    checked={selectedSet.has(v.id)}
+                    onChange={() => toggle(v.id)}
+                  />
+                </td>
+                <td className="p-2">
+
                   <input
                     defaultValue={v.title}
                     className="w-full bg-transparent outline-none focus:underline"
