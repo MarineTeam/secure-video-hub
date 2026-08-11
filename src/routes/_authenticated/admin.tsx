@@ -149,6 +149,33 @@ function VideosTab() {
   }
 
   const collections = videos.data?.collections ?? [];
+  const allVideos = videos.data?.videos ?? [];
+  const rows = filter.trim()
+    ? allVideos.filter((v) => v.title.toLowerCase().includes(filter.trim().toLowerCase()))
+    : allVideos;
+  const selectedSet = new Set(selected);
+  const allSelected = rows.length > 0 && rows.every((v) => selectedSet.has(v.id));
+
+  function toggle(id: string) {
+    setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
+  }
+  function toggleAll() {
+    setSelected(allSelected ? [] : rows.map((v) => v.id));
+  }
+  async function bulkCollection(collectionId: string | null) {
+    for (const id of selected) await setVideoCollection({ data: { id, collectionId } });
+    toast.success(`Updated ${selected.length} video(s).`);
+    setSelected([]);
+    qc.invalidateQueries({ queryKey: ["admin-videos"] });
+  }
+  async function bulkDelete() {
+    if (!confirm(`Delete ${selected.length} video(s)? This removes them from bunny.net too.`)) return;
+    for (const id of selected) await deleteVideo({ data: { id } });
+    toast.success(`Deleted ${selected.length} video(s).`);
+    setSelected([]);
+    qc.invalidateQueries({ queryKey: ["admin-videos"] });
+  }
+
 
   return (
     <div className="mt-4 space-y-4">
