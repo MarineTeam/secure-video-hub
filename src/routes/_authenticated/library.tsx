@@ -5,9 +5,12 @@ import { AppShell } from "@/components/app-shell";
 import { IdleTimeout } from "@/components/theme-provider";
 import { getLibraryPage, listCollectionsForViewer, getContinueWatching, getSessionState } from "@/lib/library.functions";
 import { getTrending, getViewCounts } from "@/lib/engagement.functions";
+import { getBrowseRows, getMyList } from "@/lib/browse.functions";
+import { HeroBillboard } from "@/components/hero-billboard";
+import { VideoRow } from "@/components/video-row";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Play, Flame, Eye } from "lucide-react";
+import { Search, Play, Flame, Eye, Bookmark, Clapperboard } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type SortKey = "recent" | "views" | "title" | "longest";
