@@ -5,9 +5,12 @@ import { AppShell } from "@/components/app-shell";
 import { IdleTimeout } from "@/components/theme-provider";
 import { getLibraryPage, listCollectionsForViewer, getContinueWatching, getSessionState } from "@/lib/library.functions";
 import { getTrending, getViewCounts } from "@/lib/engagement.functions";
+import { getBrowseRows, getMyList } from "@/lib/browse.functions";
+import { HeroBillboard } from "@/components/hero-billboard";
+import { VideoRow } from "@/components/video-row";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Play, Flame, Eye } from "lucide-react";
+import { Search, Play, Flame, Eye, Bookmark, Clapperboard } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type SortKey = "recent" | "views" | "title" | "longest";
@@ -57,6 +60,18 @@ function LibraryPage() {
     enabled: session?.isApproved === true,
     retry: false,
   });
+  const browse = useQuery({
+    queryKey: ["browse-rows"],
+    queryFn: () => getBrowseRows(),
+    enabled: session?.isApproved === true,
+    retry: false,
+  });
+  const myList = useQuery({
+    queryKey: ["mylist"],
+    queryFn: () => getMyList(),
+    enabled: session?.isApproved === true,
+    retry: false,
+  });
   const libIds = (lib.data?.items ?? []).map((v) => v.id);
   const counts = useQuery({
     queryKey: ["view-counts", libIds],
@@ -96,44 +111,49 @@ function LibraryPage() {
   return (
     <AppShell>
       <IdleTimeout />
-      <div className="space-y-6">
+      <div className="space-y-8">
+        {browse.data?.hero && (
+          <HeroBillboard
+            video={browse.data.hero}
+            {...(() => {
+              const r = (continueWatching.data ?? []).find((c) => c.id === browse.data!.hero!.id);
+              return r && r.position > 5 ? { resumeAt: Math.floor(r.position) } : {};
+            })()}
+          />
+        )}
+
         {continueWatching.data && continueWatching.data.length > 0 && (
-          <section>
-            <h2 className="mb-3 text-sm font-medium text-muted-foreground">Continue watching</h2>
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6">
-              {continueWatching.data.map((v) => (
-                <Link key={v.id} to="/watch/$videoId" params={{ videoId: v.id }} className="group">
-                  <div className="relative aspect-video overflow-hidden rounded-lg glass">
-                    {v.thumbnail ? <img src={v.thumbnail} alt={v.title} className="h-full w-full object-cover" /> : null}
-                    <div className="absolute inset-x-0 bottom-0 h-1 bg-muted">
-                      <div className="h-full gradient-brand" style={{ width: `${Math.min(100, (v.position / Math.max(1, v.duration)) * 100)}%` }} />
-                    </div>
-                  </div>
-                  <div className="mt-1 line-clamp-1 text-xs">{v.title}</div>
-                </Link>
-              ))}
-            </div>
-          </section>
+          <VideoRow
+            title="Continue watching"
+            items={continueWatching.data.map((v) => ({
+              id: v.id,
+              title: v.title,
+              thumbnail: v.thumbnail,
+              progress: (v.position / Math.max(1, v.duration)) * 100,
+            }))}
+          />
+        )}
+
+        {myList.data && myList.data.length > 0 && (
+          <VideoRow
+            title="My List"
+            icon={<Bookmark className="h-4 w-4 text-primary" />}
+            items={myList.data.map((v) => ({ id: v.id, title: v.title, thumbnail: v.thumbnail }))}
+          />
         )}
 
         {trending.data && trending.data.length > 0 && (
-          <section>
-            <h2 className="mb-3 flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
-              <Flame className="h-4 w-4 text-primary" /> Trending this month
-            </h2>
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6">
-              {trending.data.map((v) => (
-                <Link key={v.id} to="/watch/$videoId" params={{ videoId: v.id }} className="group">
-                  <div className="relative aspect-video overflow-hidden rounded-lg glass transition-transform group-hover:scale-[1.02]">
-                    {v.thumbnail ? <img src={v.thumbnail} alt={v.title} loading="lazy" className="h-full w-full object-cover" /> : null}
-                    <span className="absolute bottom-1 right-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-white">{formatViews(v.views)}</span>
-                  </div>
-                  <div className="mt-1 line-clamp-1 text-xs">{v.title}</div>
-                </Link>
-              ))}
-            </div>
-          </section>
+          <VideoRow
+            title="Trending this month"
+            icon={<Flame className="h-4 w-4 text-primary" />}
+            items={trending.data.map((v) => ({ id: v.id, title: v.title, thumbnail: v.thumbnail }))}
+          />
         )}
+
+        {(browse.data?.rows ?? []).map((row) => (
+          <VideoRow key={row.id} title={row.name} icon={<Clapperboard className="h-4 w-4 text-primary" />} items={row.items} />
+        ))}
+
 
 
 

@@ -2,7 +2,7 @@ import { Link, useRouter } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { getSessionState } from "@/lib/library.functions";
-import { Film, History, ListMusic, LogOut, Menu, Rss, Settings, User, Video } from "lucide-react";
+import { Film, History, ListMusic, LogOut, Menu, Rss, Settings, User, Video , Bookmark} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,7 +43,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <>
                 <CommandPalette />
                 <Button asChild variant="ghost" size="sm"><Link to="/"><Video className="mr-1.5 h-4 w-4" /> Library</Link></Button>
-                <Button asChild variant="ghost" size="sm"><Link to="/playlists"><ListMusic className="mr-1.5 h-4 w-4" /> Playlists</Link></Button>
+                <Button asChild variant="ghost" size="sm"><Link to="/my-list"><Bookmark className="mr-1.5 h-4 w-4" /> My List</Link></Button>
+               <Button asChild variant="ghost" size="sm"><Link to="/playlists"><ListMusic className="mr-1.5 h-4 w-4" /> Playlists</Link></Button>
                 <Button asChild variant="ghost" size="sm"><Link to="/subscriptions"><Rss className="mr-1.5 h-4 w-4" /> Subscriptions</Link></Button>
                 <Button asChild variant="ghost" size="sm"><Link to="/history"><History className="mr-1.5 h-4 w-4" /> History</Link></Button>
                 <Button asChild variant="ghost" size="sm" aria-label="Profile settings"><Link to="/settings"><User className="h-4 w-4" /></Link></Button>
@@ -72,7 +73,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   {session?.isApproved && (
                     <>
                       <Button asChild variant="ghost" className="justify-start" onClick={() => setMenuOpen(false)}><Link to="/"><Video className="mr-2 h-4 w-4" /> Library</Link></Button>
-                      <Button asChild variant="ghost" className="justify-start" onClick={() => setMenuOpen(false)}><Link to="/playlists"><ListMusic className="mr-2 h-4 w-4" /> Playlists</Link></Button>
+                      <Button asChild variant="ghost" className="justify-start" onClick={() => setMenuOpen(false)}><Link to="/my-list"><Bookmark className="mr-2 h-4 w-4" /> My List</Link></Button>
+                     <Button asChild variant="ghost" className="justify-start" onClick={() => setMenuOpen(false)}><Link to="/playlists"><ListMusic className="mr-2 h-4 w-4" /> Playlists</Link></Button>
                       <Button asChild variant="ghost" className="justify-start" onClick={() => setMenuOpen(false)}><Link to="/subscriptions"><Rss className="mr-2 h-4 w-4" /> Subscriptions</Link></Button>
                       <Button asChild variant="ghost" className="justify-start" onClick={() => setMenuOpen(false)}><Link to="/history"><History className="mr-2 h-4 w-4" /> History</Link></Button>
                       <Button asChild variant="ghost" className="justify-start" onClick={() => setMenuOpen(false)}><Link to="/settings"><User className="mr-2 h-4 w-4" /> Profile</Link></Button>
