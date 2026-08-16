@@ -6,7 +6,7 @@ import { z } from "zod";
 export type BrowseItem = {
   id: string;
   title: string;
-  thumbnail: string;
+  thumbnail: string | null;
   collectionId: string | null;
 };
 
