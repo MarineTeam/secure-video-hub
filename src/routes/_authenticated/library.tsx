@@ -60,6 +60,18 @@ function LibraryPage() {
     enabled: session?.isApproved === true,
     retry: false,
   });
+  const browse = useQuery({
+    queryKey: ["browse-rows"],
+    queryFn: () => getBrowseRows(),
+    enabled: session?.isApproved === true,
+    retry: false,
+  });
+  const myList = useQuery({
+    queryKey: ["mylist"],
+    queryFn: () => getMyList(),
+    enabled: session?.isApproved === true,
+    retry: false,
+  });
   const libIds = (lib.data?.items ?? []).map((v) => v.id);
   const counts = useQuery({
     queryKey: ["view-counts", libIds],
