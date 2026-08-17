@@ -290,37 +290,79 @@ export type Database = {
       }
       share_links: {
         Row: {
+          access_mode: string
           bunny_video_id: string
           created_at: string
           created_by: string | null
           expires_at: string
           id: string
-          recipient_email: string
+          label: string | null
+          max_views: number | null
+          password_hash: string | null
+          password_salt: string | null
+          recipient_email: string | null
           revoked_at: string | null
           token: string
+          view_count: number
           viewed_at: string | null
         }
         Insert: {
+          access_mode?: string
           bunny_video_id: string
           created_at?: string
           created_by?: string | null
           expires_at: string
           id?: string
-          recipient_email: string
+          label?: string | null
+          max_views?: number | null
+          password_hash?: string | null
+          password_salt?: string | null
+          recipient_email?: string | null
           revoked_at?: string | null
           token: string
+          view_count?: number
           viewed_at?: string | null
         }
         Update: {
+          access_mode?: string
           bunny_video_id?: string
           created_at?: string
           created_by?: string | null
           expires_at?: string
           id?: string
-          recipient_email?: string
+          label?: string | null
+          max_views?: number | null
+          password_hash?: string | null
+          password_salt?: string | null
+          recipient_email?: string | null
           revoked_at?: string | null
           token?: string
+          view_count?: number
           viewed_at?: string | null
+        }
+        Relationships: []
+      }
+      share_privileges: {
+        Row: {
+          can_share: boolean
+          can_share_public: boolean
+          created_at: string
+          granted_by: string | null
+          user_id: string
+        }
+        Insert: {
+          can_share?: boolean
+          can_share_public?: boolean
+          created_at?: string
+          granted_by?: string | null
+          user_id: string
+        }
+        Update: {
+          can_share?: boolean
+          can_share_public?: boolean
+          created_at?: string
+          granted_by?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -516,6 +558,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_share: { Args: { _user_id: string }; Returns: boolean }
+      can_share_public: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
