@@ -262,10 +262,10 @@ export const listShares = createServerFn({ method: "GET" })
     await admin(context);
     const { data } = await context.supabase
       .from("share_links")
-      .select("id, token, bunny_video_id, recipient_email, expires_at, viewed_at, revoked_at, created_at")
+      .select("id, token, bunny_video_id, recipient_email, access_mode, label, password_hash, view_count, max_views, expires_at, viewed_at, revoked_at, created_at, created_by")
       .order("created_at", { ascending: false })
-      .limit(200);
-    return data ?? [];
+      .limit(300);
+    return (data ?? []).map((s) => ({ ...s, hasPassword: !!s.password_hash, password_hash: undefined }));
   });
 
 export const createShare = createServerFn({ method: "POST" })
@@ -274,40 +274,53 @@ export const createShare = createServerFn({ method: "POST" })
     z
       .object({
         videoId: z.string().min(4).max(200),
-        recipientEmail: z.string().email().max(320),
-        ttlHours: z.number().int().min(1).max(24 * 30).default(72),
+        accessMode: z.enum(["email", "public"]).default("email"),
+        recipientEmail: z.string().email().max(320).optional().nullable(),
+        password: z.string().min(4).max(200).optional().nullable(),
+        label: z.string().max(120).optional().nullable(),
+        maxViews: z.number().int().min(1).max(10000).optional().nullable(),
+        ttlHours: z.number().int().min(1).max(24 * 90).default(72),
       })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
     const { audit } = await admin(context);
+    if (data.accessMode === "email" && !data.recipientEmail) throw new Error("Recipient email required");
     const { generateShareToken } = await import("@/lib/bunny.server");
+    const { hashSharePassword } = await import("@/lib/share.server");
     const token = generateShareToken();
     const expiresAt = new Date(Date.now() + data.ttlHours * 3600 * 1000);
+    const pw = data.password ? hashSharePassword(data.password) : null;
     const { data: row, error } = await context.supabase
       .from("share_links")
       .insert({
         token,
         bunny_video_id: data.videoId,
-        recipient_email: data.recipientEmail.toLowerCase(),
+        recipient_email: data.accessMode === "email" ? data.recipientEmail!.toLowerCase() : null,
+        access_mode: data.accessMode,
+        password_hash: pw?.hash ?? null,
+        password_salt: pw?.salt ?? null,
+        label: data.label?.trim() || null,
+        max_views: data.maxViews ?? null,
         expires_at: expiresAt.toISOString(),
         created_by: context.userId,
       })
       .select()
       .single();
     if (error) throw error;
-    await audit("share.create", row.id, { recipient: data.recipientEmail, videoId: data.videoId });
-    // Send invite email
-    try {
-      const { sendTransactionalEmail } = await import("@/lib/email/send");
-      await sendTransactionalEmail({
-        templateName: "share-invite",
-        recipientEmail: data.recipientEmail,
-        idempotencyKey: `share-${row.id}`,
-        templateData: { token, expiresAt: expiresAt.toISOString() },
-      }).catch(() => {});
-    } catch {
-      // email infra not scaffolded yet
+    await audit("share.create", row.id, { recipient: data.recipientEmail, videoId: data.videoId, mode: data.accessMode });
+    if (data.accessMode === "email" && data.recipientEmail) {
+      try {
+        const { sendTransactionalEmail } = await import("@/lib/email/send");
+        await sendTransactionalEmail({
+          templateName: "share-invite",
+          recipientEmail: data.recipientEmail,
+          idempotencyKey: `share-${row.id}`,
+          templateData: { token, expiresAt: expiresAt.toISOString() },
+        }).catch(() => {});
+      } catch {
+        // email infra not scaffolded yet
+      }
     }
     return { id: row.id, token };
   });
@@ -321,6 +334,62 @@ export const revokeShare = createServerFn({ method: "POST" })
     await audit("share.revoke", data.id);
     return { ok: true };
   });
+
+// ---------------- Share privileges ----------------
+
+export const listSharePrivileges = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await admin(context);
+    const { data } = await context.supabase
+      .from("share_privileges")
+      .select("user_id, can_share, can_share_public, created_at");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: users } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+    const emails = new Map((users?.users ?? []).map((u) => [u.id, u.email ?? ""]));
+    return (data ?? []).map((r) => ({
+      userId: r.user_id,
+      email: emails.get(r.user_id) ?? r.user_id,
+      canShare: r.can_share,
+      canSharePublic: r.can_share_public,
+    }));
+  });
+
+export const setSharePrivilege = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({ email: z.string().email().max(320), canShare: z.boolean(), canSharePublic: z.boolean() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { audit } = await admin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: users } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+    const target = (users?.users ?? []).find((u) => (u.email ?? "").toLowerCase() === data.email.toLowerCase());
+    if (!target) throw new Error("No account found for that email — they must sign in once first.");
+    const { error } = await context.supabase.from("share_privileges").upsert(
+      {
+        user_id: target.id,
+        can_share: data.canShare,
+        can_share_public: data.canSharePublic,
+        granted_by: context.userId,
+      },
+      { onConflict: "user_id" },
+    );
+    if (error) throw new Error(error.message);
+    await audit("share_privilege.set", data.email, { canShare: data.canShare, canSharePublic: data.canSharePublic });
+    return { ok: true };
+  });
+
+export const removeSharePrivilege = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ userId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { audit } = await admin(context);
+    await context.supabase.from("share_privileges").delete().eq("user_id", data.userId);
+    await audit("share_privilege.remove", data.userId);
+    return { ok: true };
+  });
+
 
 // ---------------- Settings ----------------
 
