@@ -8,7 +8,7 @@ import {
   listAdminVideos, syncBunnyLibrary, cleanupDeletedVideos, renameVideo, deleteVideo, setVideoCollection, createTusUpload,
   listCollections, createCollection, deleteCollection,
   listViewers, addViewers, removeViewer,
-  listShares, createShare, revokeShare,
+  listShares, createShare, revokeShare, listSharePrivileges, setSharePrivilege, removeSharePrivilege,
   getAllSettings, updateSetting,
   getAuditLog, getAnalytics,
 } from "@/lib/admin.functions";
@@ -488,43 +488,171 @@ function ViewersTab() {
 function SharesTab() {
   const qc = useQueryClient();
   const shares = useQuery({ queryKey: ["shares"], queryFn: () => listShares() });
+  const videos = useQuery({ queryKey: ["admin-videos"], queryFn: () => listAdminVideos() });
+  const privileges = useQuery({ queryKey: ["share-privileges"], queryFn: () => listSharePrivileges() });
+
+  const [videoId, setVideoId] = useState("");
+  const [mode, setMode] = useState<"email" | "public">("email");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [label, setLabel] = useState("");
+  const [ttl, setTtl] = useState("72");
+  const [maxViews, setMaxViews] = useState("");
+
+  const [privEmail, setPrivEmail] = useState("");
+  const [privPublic, setPrivPublic] = useState(false);
+
+  const create = useMutation({
+    mutationFn: () =>
+      createShare({
+        data: {
+          videoId,
+          accessMode: mode,
+          recipientEmail: mode === "email" ? email.trim() : null,
+          password: mode === "public" && password.trim() ? password.trim() : null,
+          label: label.trim() || null,
+          maxViews: maxViews ? Number(maxViews) : null,
+          ttlHours: Number(ttl),
+        },
+      }),
+    onSuccess: (r) => {
+      navigator.clipboard?.writeText(`${window.location.origin}/s/${r.token}`).catch(() => {});
+      toast.success("Share link created and copied.");
+      setEmail(""); setPassword(""); setLabel(""); setMaxViews("");
+      qc.invalidateQueries({ queryKey: ["shares"] });
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
   const revoke = useMutation({
     mutationFn: (id: string) => revokeShare({ data: { id } }),
     onSuccess: () => { toast.success("Revoked."); qc.invalidateQueries({ queryKey: ["shares"] }); },
     onError: (e) => toast.error((e as Error).message),
   });
+
+  const grant = useMutation({
+    mutationFn: () => setSharePrivilege({ data: { email: privEmail.trim(), canShare: true, canSharePublic: privPublic } }),
+    onSuccess: () => { toast.success("Permission saved."); setPrivEmail(""); qc.invalidateQueries({ queryKey: ["share-privileges"] }); },
+    onError: (e) => toast.error((e as Error).message),
+  });
+  const ungrant = useMutation({
+    mutationFn: (userId: string) => removeSharePrivilege({ data: { userId } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["share-privileges"] }),
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  const titles = new Map((videos.data?.videos ?? []).map((v) => [v.id, v.title]));
+
   return (
-    <div className="mt-4 glass rounded-xl p-4">
-      <h3 className="mb-3 font-medium">Share links</h3>
-      <table className="w-full text-sm">
-        <thead className="text-left text-xs text-muted-foreground"><tr>
-          <th className="p-2">Recipient</th><th className="p-2">Video</th><th className="p-2">Expires</th><th className="p-2">Status</th><th className="p-2"></th>
-        </tr></thead>
-        <tbody>
-          {(shares.data ?? []).map((s) => {
-            const status = s.revoked_at ? "revoked" : new Date(s.expires_at) < new Date() ? "expired" : s.viewed_at ? "viewed" : "sent";
-            return (
-              <tr key={s.id} className="border-t border-border/50">
-                <td className="p-2">{s.recipient_email}</td>
-                <td className="p-2 font-mono text-xs">{s.bunny_video_id.slice(0, 8)}…</td>
-                <td className="p-2 text-xs">{new Date(s.expires_at).toLocaleString()}</td>
-                <td className="p-2 text-xs">{status}</td>
-                <td className="p-2 text-right">
-                  {!s.revoked_at && (
-                    <>
-                      <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/s/${s.token}`); toast.success("Copied."); }}>Copy</Button>
-                      <Button variant="ghost" size="sm" onClick={() => revoke.mutate(s.id)}>Revoke</Button>
-                    </>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+    <div className="mt-4 space-y-4">
+      <div className="glass rounded-xl p-4">
+        <h3 className="mb-3 font-medium">Create a share link</h3>
+        <div className="grid gap-2 md:grid-cols-2">
+          <select
+            className="h-9 rounded-md border bg-transparent px-2 text-sm"
+            value={videoId}
+            onChange={(e) => setVideoId(e.target.value)}
+          >
+            <option value="">Select a video…</option>
+            {(videos.data?.videos ?? []).map((v) => (
+              <option key={v.id} value={v.id}>{v.title}</option>
+            ))}
+          </select>
+          <select
+            className="h-9 rounded-md border bg-transparent px-2 text-sm"
+            value={mode}
+            onChange={(e) => setMode(e.target.value as "email" | "public")}
+          >
+            <option value="email">Private — one email (guests allowed)</option>
+            <option value="public">Public — anyone with the link</option>
+          </select>
+          {mode === "email" ? (
+            <Input placeholder="recipient@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+          ) : (
+            <Input type="password" placeholder="Optional password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          )}
+          <Input placeholder="Label (optional)" value={label} onChange={(e) => setLabel(e.target.value)} />
+          <select className="h-9 rounded-md border bg-transparent px-2 text-sm" value={ttl} onChange={(e) => setTtl(e.target.value)}>
+            <option value="24">Expires in 24 hours</option>
+            <option value="72">Expires in 3 days</option>
+            <option value="168">Expires in 7 days</option>
+            <option value="720">Expires in 30 days</option>
+            <option value="2160">Expires in 90 days</option>
+          </select>
+          <Input placeholder="Max views (optional)" value={maxViews} inputMode="numeric" onChange={(e) => setMaxViews(e.target.value.replace(/\D/g, ""))} />
+        </div>
+        <Button className="mt-3" disabled={!videoId || (mode === "email" && !email.trim()) || create.isPending} onClick={() => create.mutate()}>
+          <Share2 className="mr-1.5 h-4 w-4" /> Create link
+        </Button>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Public links bypass the members-only rule for that single video. Private links let a guest watch after signing in with the invited address.
+        </p>
+      </div>
+
+      <div className="glass rounded-xl p-4">
+        <h3 className="mb-3 font-medium">Share links</h3>
+        <table className="w-full text-sm">
+          <thead className="text-left text-xs text-muted-foreground"><tr>
+            <th className="p-2">Recipient / mode</th><th className="p-2">Video</th><th className="p-2">Expires</th><th className="p-2">Views</th><th className="p-2">Status</th><th className="p-2"></th>
+          </tr></thead>
+          <tbody>
+            {(shares.data ?? []).map((s) => {
+              const status = s.revoked_at ? "revoked" : new Date(s.expires_at) < new Date() ? "expired" : s.viewed_at ? "viewed" : "sent";
+              return (
+                <tr key={s.id} className="border-t border-border/50">
+                  <td className="p-2">
+                    {s.access_mode === "public" ? "Public link" : s.recipient_email}
+                    {s.hasPassword && <span className="ml-1 text-xs text-muted-foreground">(password)</span>}
+                    {s.label && <div className="text-xs text-muted-foreground">{s.label}</div>}
+                  </td>
+                  <td className="p-2 text-xs">{titles.get(s.bunny_video_id) ?? `${s.bunny_video_id.slice(0, 8)}…`}</td>
+                  <td className="p-2 text-xs">{new Date(s.expires_at).toLocaleString()}</td>
+                  <td className="p-2 text-xs">{s.view_count}{s.max_views ? ` / ${s.max_views}` : ""}</td>
+                  <td className="p-2 text-xs">{status}</td>
+                  <td className="p-2 text-right">
+                    <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/s/${s.token}`); toast.success("Copied."); }}>Copy</Button>
+                    {!s.revoked_at && <Button variant="ghost" size="sm" onClick={() => revoke.mutate(s.id)}>Revoke</Button>}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="glass rounded-xl p-4">
+        <h3 className="mb-1 font-medium">Who can share</h3>
+        <p className="mb-3 text-xs text-muted-foreground">
+          Admins can always share. Grant other members permission here — optionally including public links that bypass members-only access.
+        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <Input className="max-w-xs" placeholder="member@example.com" value={privEmail} onChange={(e) => setPrivEmail(e.target.value)} />
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={privPublic} onChange={(e) => setPrivPublic(e.target.checked)} /> Allow public links
+          </label>
+          <Button size="sm" disabled={!privEmail.trim() || grant.isPending} onClick={() => grant.mutate()}><Plus className="mr-1.5 h-4 w-4" /> Grant</Button>
+        </div>
+        <div className="mt-3 divide-y">
+          {(privileges.data ?? []).map((p) => (
+            <div key={p.userId} className="flex items-center justify-between py-2 text-sm">
+              <div>
+                <div>{p.email}</div>
+                <div className="text-xs text-muted-foreground">
+                  {p.canShare ? "Can share" : "Sharing off"}{p.canSharePublic ? " · public links allowed" : ""}
+                </div>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => ungrant.mutate(p.userId)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+            </div>
+          ))}
+          {privileges.data && privileges.data.length === 0 && (
+            <p className="py-3 text-center text-xs text-muted-foreground">No extra sharers yet.</p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
+
 
 // ---- Settings ----
 

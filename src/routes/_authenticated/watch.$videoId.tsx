@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { readDeviceSettings } from "@/lib/device-settings";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/app-shell";
@@ -44,9 +45,13 @@ function WatchPage() {
   const playerRef = useRef<PlayerApi | null>(null);
 
   useEffect(() => {
-    setAutoplay(localStorage.getItem(AUTOPLAY_KEY) === "1");
+    // Per-device defaults from Profile → Settings, overridable inline here.
+    const device = readDeviceSettings();
+    const storedAutoplay = localStorage.getItem(AUTOPLAY_KEY);
+    const storedSpeed = Number(localStorage.getItem(SPEED_KEY));
+    setAutoplay(storedAutoplay === null ? device.autoplayNext : storedAutoplay === "1");
     setTheater(localStorage.getItem(THEATER_KEY) === "1");
-    setSpeed(Number(localStorage.getItem(SPEED_KEY)) || 1);
+    setSpeed(storedSpeed || device.defaultPlaybackRate || 1);
   }, []);
 
 
