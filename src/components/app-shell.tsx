@@ -47,7 +47,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                <Button asChild variant="ghost" size="sm"><Link to="/playlists"><ListMusic className="mr-1.5 h-4 w-4" /> Playlists</Link></Button>
                 <Button asChild variant="ghost" size="sm"><Link to="/subscriptions"><Rss className="mr-1.5 h-4 w-4" /> Subscriptions</Link></Button>
                 <Button asChild variant="ghost" size="sm"><Link to="/history"><History className="mr-1.5 h-4 w-4" /> History</Link></Button>
-                <Button asChild variant="ghost" size="sm" aria-label="Profile settings"><Link to="/settings"><User className="h-4 w-4" /></Link></Button>
+                <Button asChild variant="ghost" size="sm" aria-label="Profile settings"><Link to="/profile"><User className="h-4 w-4" /></Link></Button>
                 <NotificationsBell />
               </>
             )}
@@ -77,7 +77,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                      <Button asChild variant="ghost" className="justify-start" onClick={() => setMenuOpen(false)}><Link to="/playlists"><ListMusic className="mr-2 h-4 w-4" /> Playlists</Link></Button>
                       <Button asChild variant="ghost" className="justify-start" onClick={() => setMenuOpen(false)}><Link to="/subscriptions"><Rss className="mr-2 h-4 w-4" /> Subscriptions</Link></Button>
                       <Button asChild variant="ghost" className="justify-start" onClick={() => setMenuOpen(false)}><Link to="/history"><History className="mr-2 h-4 w-4" /> History</Link></Button>
-                      <Button asChild variant="ghost" className="justify-start" onClick={() => setMenuOpen(false)}><Link to="/settings"><User className="mr-2 h-4 w-4" /> Profile</Link></Button>
+                      <Button asChild variant="ghost" className="justify-start" onClick={() => setMenuOpen(false)}><Link to="/profile"><User className="mr-2 h-4 w-4" /> Profile</Link></Button>
 
                     </>
                   )}
