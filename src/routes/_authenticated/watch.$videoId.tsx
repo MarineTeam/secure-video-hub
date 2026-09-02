@@ -44,9 +44,13 @@ function WatchPage() {
   const playerRef = useRef<PlayerApi | null>(null);
 
   useEffect(() => {
-    setAutoplay(localStorage.getItem(AUTOPLAY_KEY) === "1");
+    // Per-device defaults from Profile → Settings, overridable inline here.
+    const device = readDeviceSettings();
+    const storedAutoplay = localStorage.getItem(AUTOPLAY_KEY);
+    const storedSpeed = Number(localStorage.getItem(SPEED_KEY));
+    setAutoplay(storedAutoplay === null ? device.autoplayNext : storedAutoplay === "1");
     setTheater(localStorage.getItem(THEATER_KEY) === "1");
-    setSpeed(Number(localStorage.getItem(SPEED_KEY)) || 1);
+    setSpeed(storedSpeed || device.defaultPlaybackRate || 1);
   }, []);
 
 
