@@ -8,7 +8,7 @@ import {
   listAdminVideos, syncBunnyLibrary, cleanupDeletedVideos, renameVideo, deleteVideo, setVideoCollection, createTusUpload,
   listCollections, createCollection, deleteCollection,
   listViewers, addViewers, removeViewer,
-  listShares, createShare, revokeShare,
+  listShares, createShare, revokeShare, listSharePrivileges, setSharePrivilege, removeSharePrivilege,
   getAllSettings, updateSetting,
   getAuditLog, getAnalytics,
 } from "@/lib/admin.functions";
