@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { getPaletteSetting } from "@/lib/library.functions";
 import { paletteFromValue, applyPalette } from "@/lib/theme";
+import { applyThemeMode, readDeviceSettings } from "@/lib/device-settings";
 import { useQuery } from "@tanstack/react-query";
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
@@ -13,6 +14,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (data?.palette) applyPalette(paletteFromValue(data.palette));
   }, [data?.palette]);
+
+  // Per-device theme mode (system / light / dark).
+  useEffect(() => {
+    const apply = () => applyThemeMode(readDeviceSettings().themeMode);
+    apply();
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    mq.addEventListener("change", apply);
+    window.addEventListener("mvp:device-settings", apply);
+    return () => {
+      mq.removeEventListener("change", apply);
+      window.removeEventListener("mvp:device-settings", apply);
+    };
+  }, []);
+
   return <>{children}</>;
 }
 
