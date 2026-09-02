@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { readDeviceSettings } from "@/lib/device-settings";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/app-shell";
@@ -21,7 +22,6 @@ export const Route = createFileRoute("/_authenticated/watch/$videoId")({
   component: WatchPage,
 });
 
-import { readDeviceSettings } from "@/lib/device-settings";
 const AUTOPLAY_KEY = "mvp:autoplay-next";
 const THEATER_KEY = "mvp:theater";
 const SPEED_KEY = "mvp:speed";
