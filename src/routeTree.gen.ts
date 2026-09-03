@@ -29,6 +29,7 @@ import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedWatchVideoIdRouteImport } from './routes/_authenticated/watch.$videoId'
 import { Route as AuthenticatedPlaylistsIdRouteImport } from './routes/_authenticated/playlists.$id'
+import { Route as AuthenticatedAdminPluginsRouteImport } from './routes/_authenticated/admin.plugins'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 
@@ -136,6 +137,12 @@ const AuthenticatedPlaylistsIdRoute =
     path: '/$id',
     getParentRoute: () => AuthenticatedPlaylistsRoute,
   } as any)
+const AuthenticatedAdminPluginsRoute =
+  AuthenticatedAdminPluginsRouteImport.update({
+    id: '/plugins',
+    path: '/plugins',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
     id: '/.mcp/invoke-tool/$tool',
@@ -167,6 +174,7 @@ export interface FileRoutesByFullPath {
   '/s/$token': typeof STokenRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/admin/plugins': typeof AuthenticatedAdminPluginsRoute
   '/playlists/$id': typeof AuthenticatedPlaylistsIdRoute
   '/watch/$videoId': typeof AuthenticatedWatchVideoIdRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -189,6 +197,7 @@ export interface FileRoutesByTo {
   '/s/$token': typeof STokenRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/admin/plugins': typeof AuthenticatedAdminPluginsRoute
   '/playlists/$id': typeof AuthenticatedPlaylistsIdRoute
   '/watch/$videoId': typeof AuthenticatedWatchVideoIdRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -214,6 +223,7 @@ export interface FileRoutesById {
   '/s/$token': typeof STokenRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/_authenticated/admin/plugins': typeof AuthenticatedAdminPluginsRoute
   '/_authenticated/playlists/$id': typeof AuthenticatedPlaylistsIdRoute
   '/_authenticated/watch/$videoId': typeof AuthenticatedWatchVideoIdRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/s/$token'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/admin/plugins'
     | '/playlists/$id'
     | '/watch/$videoId'
     | '/admin/'
@@ -261,6 +272,7 @@ export interface FileRouteTypes {
     | '/s/$token'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/admin/plugins'
     | '/playlists/$id'
     | '/watch/$videoId'
     | '/admin'
@@ -285,6 +297,7 @@ export interface FileRouteTypes {
     | '/s/$token'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/_authenticated/admin/plugins'
     | '/_authenticated/playlists/$id'
     | '/_authenticated/watch/$videoId'
     | '/_authenticated/admin/'
@@ -446,6 +459,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPlaylistsIdRouteImport
       parentRoute: typeof AuthenticatedPlaylistsRoute
     }
+    '/_authenticated/admin/plugins': {
+      id: '/_authenticated/admin/plugins'
+      path: '/plugins'
+      fullPath: '/admin/plugins'
+      preLoaderRoute: typeof AuthenticatedAdminPluginsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/.mcp/invoke-tool/$tool': {
       id: '/.mcp/invoke-tool/$tool'
       path: '/.mcp/invoke-tool/$tool'
@@ -464,10 +484,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminPluginsRoute: typeof AuthenticatedAdminPluginsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminPluginsRoute: AuthenticatedAdminPluginsRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
