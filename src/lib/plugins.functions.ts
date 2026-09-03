@@ -69,7 +69,7 @@ export const setPluginEnabled = createServerFn({ method: "POST" })
 export const updatePluginSettings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
-    z.object({ id: z.enum(PLUGIN_IDS as [string, ...string[]]), settings: z.record(z.string(), z.unknown()) }).parse(d),
+    z.object({ id: z.enum(PLUGIN_IDS as [string, ...string[]]), settings: z.string() }).parse(d),
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
@@ -78,7 +78,7 @@ export const updatePluginSettings = createServerFn({ method: "POST" })
     const { error } = await supabase.from("plugin_states").upsert(
       {
         id: data.id,
-        settings: data.settings as never,
+        settings: JSON.parse(data.settings) as never,
         updated_at: new Date().toISOString(),
         updated_by: userId,
       },
@@ -106,7 +106,7 @@ export const listPluginStates = createServerFn({ method: "GET" })
       permissions: p.permissions,
       tables: p.tables,
       enabled: p.core || (overrides.get(p.id)?.enabled ?? p.defaultEnabled),
-      settings: (overrides.get(p.id)?.settings ?? {}) as Record<string, unknown>,
+      settings: JSON.stringify(overrides.get(p.id)?.settings ?? {}),
     }));
   });
 
