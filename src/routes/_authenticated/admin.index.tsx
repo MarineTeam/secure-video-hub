@@ -27,7 +27,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import * as tus from "tus-js-client";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
 
-export const Route = createFileRoute("/_authenticated/admin")({ component: AdminPage });
+export const Route = createFileRoute("/_authenticated/admin/")({ component: AdminPage });
 
 function AdminPage() {
   const session = useQuery({ queryKey: ["session-state"], queryFn: () => getSessionState() });
