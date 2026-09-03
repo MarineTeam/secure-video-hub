@@ -219,6 +219,30 @@ export type Database = {
         }
         Relationships: []
       }
+      plugin_states: {
+        Row: {
+          enabled: boolean
+          id: string
+          settings: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          enabled?: boolean
+          id: string
+          settings?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          enabled?: boolean
+          id?: string
+          settings?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -264,6 +288,24 @@ export type Database = {
           count?: number
           key?: string
           window_start?: string
+        }
+        Relationships: []
+      }
+      role_permissions: {
+        Row: {
+          created_at: string
+          permission: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          created_at?: string
+          permission: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          created_at?: string
+          permission?: string
+          role?: Database["public"]["Enums"]["app_role"]
         }
         Relationships: []
       }
@@ -560,6 +602,10 @@ export type Database = {
     Functions: {
       can_share: { Args: { _user_id: string }; Returns: boolean }
       can_share_public: { Args: { _user_id: string }; Returns: boolean }
+      has_permission: {
+        Args: { _permission: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -568,6 +614,7 @@ export type Database = {
         Returns: boolean
       }
       is_approved_viewer: { Args: never; Returns: boolean }
+      plugin_enabled: { Args: { _id: string }; Returns: boolean }
       public_playlist: {
         Args: { _token: string }
         Returns: {
@@ -595,7 +642,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "staff" | "volunteer" | "member"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -723,7 +770,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "staff", "volunteer", "member"],
     },
   },
 } as const

@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1788398519846,
+      "tag": "0000_add_roles_enum_values",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788398554824,
+      "tag": "0001_plugin_framework_and_permissions",
+      "breakpoints": true
+    }
+  ]
+}

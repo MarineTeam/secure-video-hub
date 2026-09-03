@@ -26,8 +26,10 @@ import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedWatchVideoIdRouteImport } from './routes/_authenticated/watch.$videoId'
 import { Route as AuthenticatedPlaylistsIdRouteImport } from './routes/_authenticated/playlists.$id'
+import { Route as AuthenticatedAdminPluginsRouteImport } from './routes/_authenticated/admin.plugins'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 
@@ -118,6 +120,11 @@ const Char91DotmcpChar93ListToolsRoute =
     path: '/.mcp/list-tools',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedWatchVideoIdRoute =
   AuthenticatedWatchVideoIdRouteImport.update({
     id: '/watch/$videoId',
@@ -129,6 +136,12 @@ const AuthenticatedPlaylistsIdRoute =
     id: '/$id',
     path: '/$id',
     getParentRoute: () => AuthenticatedPlaylistsRoute,
+  } as any)
+const AuthenticatedAdminPluginsRoute =
+  AuthenticatedAdminPluginsRouteImport.update({
+    id: '/plugins',
+    path: '/plugins',
+    getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
@@ -149,7 +162,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/history': typeof AuthenticatedHistoryRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/my-list': typeof AuthenticatedMyListRoute
@@ -161,8 +174,10 @@ export interface FileRoutesByFullPath {
   '/s/$token': typeof STokenRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/admin/plugins': typeof AuthenticatedAdminPluginsRoute
   '/playlists/$id': typeof AuthenticatedPlaylistsIdRoute
   '/watch/$videoId': typeof AuthenticatedWatchVideoIdRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -171,7 +186,6 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
-  '/admin': typeof AuthenticatedAdminRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/my-list': typeof AuthenticatedMyListRoute
@@ -183,8 +197,10 @@ export interface FileRoutesByTo {
   '/s/$token': typeof STokenRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/admin/plugins': typeof AuthenticatedAdminPluginsRoute
   '/playlists/$id': typeof AuthenticatedPlaylistsIdRoute
   '/watch/$videoId': typeof AuthenticatedWatchVideoIdRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -195,7 +211,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
   '/_authenticated/my-list': typeof AuthenticatedMyListRoute
@@ -207,8 +223,10 @@ export interface FileRoutesById {
   '/s/$token': typeof STokenRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/_authenticated/admin/plugins': typeof AuthenticatedAdminPluginsRoute
   '/_authenticated/playlists/$id': typeof AuthenticatedPlaylistsIdRoute
   '/_authenticated/watch/$videoId': typeof AuthenticatedWatchVideoIdRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -231,8 +249,10 @@ export interface FileRouteTypes {
     | '/s/$token'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/admin/plugins'
     | '/playlists/$id'
     | '/watch/$videoId'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -241,7 +261,6 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
-    | '/admin'
     | '/history'
     | '/library'
     | '/my-list'
@@ -253,8 +272,10 @@ export interface FileRouteTypes {
     | '/s/$token'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/admin/plugins'
     | '/playlists/$id'
     | '/watch/$videoId'
+    | '/admin'
   id:
     | '__root__'
     | '/'
@@ -276,8 +297,10 @@ export interface FileRouteTypes {
     | '/s/$token'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/_authenticated/admin/plugins'
     | '/_authenticated/playlists/$id'
     | '/_authenticated/watch/$videoId'
+    | '/_authenticated/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -415,6 +438,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/watch/$videoId': {
       id: '/_authenticated/watch/$videoId'
       path: '/watch/$videoId'
@@ -428,6 +458,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/playlists/$id'
       preLoaderRoute: typeof AuthenticatedPlaylistsIdRouteImport
       parentRoute: typeof AuthenticatedPlaylistsRoute
+    }
+    '/_authenticated/admin/plugins': {
+      id: '/_authenticated/admin/plugins'
+      path: '/plugins'
+      fullPath: '/admin/plugins'
+      preLoaderRoute: typeof AuthenticatedAdminPluginsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
     }
     '/.mcp/invoke-tool/$tool': {
       id: '/.mcp/invoke-tool/$tool'
@@ -446,6 +483,19 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminPluginsRoute: typeof AuthenticatedAdminPluginsRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminPluginsRoute: AuthenticatedAdminPluginsRoute,
+  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
 interface AuthenticatedPlaylistsRouteChildren {
   AuthenticatedPlaylistsIdRoute: typeof AuthenticatedPlaylistsIdRoute
 }
@@ -461,7 +511,7 @@ const AuthenticatedPlaylistsRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
   AuthenticatedMyListRoute: typeof AuthenticatedMyListRoute
@@ -473,7 +523,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
   AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
   AuthenticatedMyListRoute: AuthenticatedMyListRoute,
