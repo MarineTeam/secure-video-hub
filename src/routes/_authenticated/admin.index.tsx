@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
@@ -45,7 +45,11 @@ function AdminPage() {
   return (
     <AppShell>
       <IdleTimeout />
-      <h1 className="mb-4 text-2xl font-bold gradient-text">Admin</h1>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-2xl font-bold gradient-text">Admin</h1>
+        <Button asChild variant="outline" size="sm"><Link to="/admin/plugins">Modules &amp; permissions</Link></Button>
+      </div>
+
       <Tabs defaultValue="videos" className="w-full">
         <TabsList className="glass w-full flex-wrap">
           <TabsTrigger value="videos">Videos</TabsTrigger>
