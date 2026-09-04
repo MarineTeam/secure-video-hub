@@ -2,12 +2,16 @@ import { Link, useRouter } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { getSessionState } from "@/lib/library.functions";
-import { Film, History, ListMusic, LogOut, Menu, Rss, Settings, User, Video , Bookmark} from "lucide-react";
+import { Film, LogOut, Menu, Settings, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { NotificationsBell } from "@/components/notifications-bell";
 import { CommandPalette } from "@/components/command-palette";
+import { NavIcon } from "@/components/nav-icon";
+import { usePlugins } from "@/hooks/use-plugins";
+import { PLUGINS, PLUGIN_GROUP_LABELS, type PluginGroup } from "@/lib/plugins/registry";
+
 
 
 export function AppShell({ children }: { children: React.ReactNode }) {
