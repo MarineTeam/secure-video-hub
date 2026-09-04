@@ -123,7 +123,7 @@ export const PLUGINS: PluginDef[] = [
     icon: "HeartHandshake",
     group: "church",
     defaultEnabled: true,
-    permissions: ["prayer.read", "prayer.moderate"],
+    permissions: ["prayer.read", "prayer.manage"],
     nav: [{ label: "Prayer", to: "/prayer", icon: "HeartHandshake" }],
     routes: ["/prayer"],
     tables: ["prayer_requests"],
