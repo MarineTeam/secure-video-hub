@@ -46,11 +46,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {session?.isApproved && (
               <>
                 <CommandPalette />
-                <Button asChild variant="ghost" size="sm"><Link to="/"><Video className="mr-1.5 h-4 w-4" /> Library</Link></Button>
-                <Button asChild variant="ghost" size="sm"><Link to="/my-list"><Bookmark className="mr-1.5 h-4 w-4" /> My List</Link></Button>
-               <Button asChild variant="ghost" size="sm"><Link to="/playlists"><ListMusic className="mr-1.5 h-4 w-4" /> Playlists</Link></Button>
-                <Button asChild variant="ghost" size="sm"><Link to="/subscriptions"><Rss className="mr-1.5 h-4 w-4" /> Subscriptions</Link></Button>
-                <Button asChild variant="ghost" size="sm"><Link to="/history"><History className="mr-1.5 h-4 w-4" /> History</Link></Button>
+                {navEntries.map((e) => (
+                  <Button key={e.to} asChild variant="ghost" size="sm">
+                    <Link to={e.to as "/"}>
+                      <NavIcon name={e.icon} className="mr-1.5 h-4 w-4" /> {e.label}
+                    </Link>
+                  </Button>
+                ))}
                 <Button asChild variant="ghost" size="sm" aria-label="Profile settings"><Link to="/profile"><User className="h-4 w-4" /></Link></Button>
                 <NotificationsBell />
               </>
@@ -69,25 +71,34 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <SheetTrigger asChild>
                 <Button variant="ghost" size="sm" aria-label="Open menu"><Menu className="h-5 w-5" /></Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-72">
+              <SheetContent side="right" className="w-72 overflow-y-auto">
                 <SheetHeader>
                   <SheetTitle className="gradient-text text-left">Marine Video Portal</SheetTitle>
                 </SheetHeader>
                 <div className="mt-6 flex flex-col gap-1">
                   {session?.isApproved && (
                     <>
-                      <Button asChild variant="ghost" className="justify-start" onClick={() => setMenuOpen(false)}><Link to="/"><Video className="mr-2 h-4 w-4" /> Library</Link></Button>
-                      <Button asChild variant="ghost" className="justify-start" onClick={() => setMenuOpen(false)}><Link to="/my-list"><Bookmark className="mr-2 h-4 w-4" /> My List</Link></Button>
-                     <Button asChild variant="ghost" className="justify-start" onClick={() => setMenuOpen(false)}><Link to="/playlists"><ListMusic className="mr-2 h-4 w-4" /> Playlists</Link></Button>
-                      <Button asChild variant="ghost" className="justify-start" onClick={() => setMenuOpen(false)}><Link to="/subscriptions"><Rss className="mr-2 h-4 w-4" /> Subscriptions</Link></Button>
-                      <Button asChild variant="ghost" className="justify-start" onClick={() => setMenuOpen(false)}><Link to="/history"><History className="mr-2 h-4 w-4" /> History</Link></Button>
-                      <Button asChild variant="ghost" className="justify-start" onClick={() => setMenuOpen(false)}><Link to="/profile"><User className="mr-2 h-4 w-4" /> Profile</Link></Button>
-
+                      {navGroups.map(([group, entries]) => (
+                        <div key={group} className="mt-2 first:mt-0">
+                          <div className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                            {PLUGIN_GROUP_LABELS[group]}
+                          </div>
+                          {entries.map((e) => (
+                            <Button key={e.to} asChild variant="ghost" className="w-full justify-start" onClick={() => setMenuOpen(false)}>
+                              <Link to={e.to as "/"}>
+                                <NavIcon name={e.icon} className="mr-2 h-4 w-4" /> {e.label}
+                              </Link>
+                            </Button>
+                          ))}
+                        </div>
+                      ))}
+                      <Button asChild variant="ghost" className="mt-2 justify-start" onClick={() => setMenuOpen(false)}><Link to="/profile"><User className="mr-2 h-4 w-4" /> Profile</Link></Button>
                     </>
                   )}
                   {session?.isAdmin && (
                     <Button asChild variant="ghost" className="justify-start" onClick={() => setMenuOpen(false)}><Link to="/admin"><Settings className="mr-2 h-4 w-4" /> Admin</Link></Button>
                   )}
+
                   <div className="mt-4 border-t pt-4 text-xs text-muted-foreground">{session?.email}</div>
                   <Button variant="ghost" className="mt-1 justify-start" onClick={() => { setMenuOpen(false); signOut(); }}>
                     <LogOut className="mr-2 h-4 w-4" /> Sign out
