@@ -15,6 +15,13 @@
       "when": 1788398554824,
       "tag": "0001_plugin_framework_and_permissions",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788492028139,
+      "tag": "0002_church_modules",
+      "breakpoints": true
     }
   ]
 }
