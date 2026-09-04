@@ -25,6 +25,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     retry: false,
   });
 
+  const { isEnabled, can } = usePlugins();
+  const visible = PLUGINS.filter((p) => isEnabled(p.id));
+  const navEntries = visible.flatMap((p) =>
+    p.nav.filter((e) => !e.admin && can(e.permission)).map((e) => ({ ...e, group: p.group })),
+  );
+  const navGroups = Array.from(
+    navEntries.reduce((m, e) => {
+      const list = m.get(e.group) ?? [];
+      list.push(e);
+      m.set(e.group, list);
+      return m;
+    }, new Map<PluginGroup, typeof navEntries>()),
+  );
+
+
   async function signOut() {
     await qc.cancelQueries();
     qc.clear();
