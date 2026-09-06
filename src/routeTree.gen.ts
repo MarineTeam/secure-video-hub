@@ -22,6 +22,7 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedPlaylistsRouteImport } from './routes/_authenticated/playlists'
 import { Route as AuthenticatedMyListRouteImport } from './routes/_authenticated/my-list'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
+import { Route as AuthenticatedHymnalRouteImport } from './routes/_authenticated/hymnal'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
@@ -98,6 +99,11 @@ const AuthenticatedLibraryRoute = AuthenticatedLibraryRouteImport.update({
   path: '/library',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedHymnalRoute = AuthenticatedHymnalRouteImport.update({
+  id: '/hymnal',
+  path: '/hymnal',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedHistoryRoute = AuthenticatedHistoryRouteImport.update({
   id: '/history',
   path: '/history',
@@ -164,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/history': typeof AuthenticatedHistoryRoute
+  '/hymnal': typeof AuthenticatedHymnalRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/my-list': typeof AuthenticatedMyListRoute
   '/playlists': typeof AuthenticatedPlaylistsRouteWithChildren
@@ -187,6 +194,7 @@ export interface FileRoutesByTo {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/history': typeof AuthenticatedHistoryRoute
+  '/hymnal': typeof AuthenticatedHymnalRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/my-list': typeof AuthenticatedMyListRoute
   '/playlists': typeof AuthenticatedPlaylistsRouteWithChildren
@@ -213,6 +221,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
+  '/_authenticated/hymnal': typeof AuthenticatedHymnalRoute
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
   '/_authenticated/my-list': typeof AuthenticatedMyListRoute
   '/_authenticated/playlists': typeof AuthenticatedPlaylistsRouteWithChildren
@@ -239,6 +248,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin'
     | '/history'
+    | '/hymnal'
     | '/library'
     | '/my-list'
     | '/playlists'
@@ -262,6 +272,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/history'
+    | '/hymnal'
     | '/library'
     | '/my-list'
     | '/playlists'
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/admin'
     | '/_authenticated/history'
+    | '/_authenticated/hymnal'
     | '/_authenticated/library'
     | '/_authenticated/my-list'
     | '/_authenticated/playlists'
@@ -410,6 +422,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLibraryRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/hymnal': {
+      id: '/_authenticated/hymnal'
+      path: '/hymnal'
+      fullPath: '/hymnal'
+      preLoaderRoute: typeof AuthenticatedHymnalRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/history': {
       id: '/_authenticated/history'
       path: '/history'
@@ -513,6 +532,7 @@ const AuthenticatedPlaylistsRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
+  AuthenticatedHymnalRoute: typeof AuthenticatedHymnalRoute
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
   AuthenticatedMyListRoute: typeof AuthenticatedMyListRoute
   AuthenticatedPlaylistsRoute: typeof AuthenticatedPlaylistsRouteWithChildren
@@ -525,6 +545,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
+  AuthenticatedHymnalRoute: AuthenticatedHymnalRoute,
   AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
   AuthenticatedMyListRoute: AuthenticatedMyListRoute,
   AuthenticatedPlaylistsRoute: AuthenticatedPlaylistsRouteWithChildren,
