@@ -19,11 +19,13 @@ import { Route as PTokenRouteImport } from './routes/p.$token'
 import { Route as AuthenticatedSubscriptionsRouteImport } from './routes/_authenticated/subscriptions'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedPrayerRouteImport } from './routes/_authenticated/prayer'
 import { Route as AuthenticatedPlaylistsRouteImport } from './routes/_authenticated/playlists'
 import { Route as AuthenticatedMyListRouteImport } from './routes/_authenticated/my-list'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
 import { Route as AuthenticatedHymnalRouteImport } from './routes/_authenticated/hymnal'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
+import { Route as AuthenticatedEventsRouteImport } from './routes/_authenticated/events'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
@@ -84,6 +86,11 @@ const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPrayerRoute = AuthenticatedPrayerRouteImport.update({
+  id: '/prayer',
+  path: '/prayer',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPlaylistsRoute = AuthenticatedPlaylistsRouteImport.update({
   id: '/playlists',
   path: '/playlists',
@@ -107,6 +114,11 @@ const AuthenticatedHymnalRoute = AuthenticatedHymnalRouteImport.update({
 const AuthenticatedHistoryRoute = AuthenticatedHistoryRouteImport.update({
   id: '/history',
   path: '/history',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedEventsRoute = AuthenticatedEventsRouteImport.update({
+  id: '/events',
+  path: '/events',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
@@ -169,11 +181,13 @@ export interface FileRoutesByFullPath {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/events': typeof AuthenticatedEventsRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/hymnal': typeof AuthenticatedHymnalRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/my-list': typeof AuthenticatedMyListRoute
   '/playlists': typeof AuthenticatedPlaylistsRouteWithChildren
+  '/prayer': typeof AuthenticatedPrayerRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/subscriptions': typeof AuthenticatedSubscriptionsRoute
@@ -193,11 +207,13 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/events': typeof AuthenticatedEventsRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/hymnal': typeof AuthenticatedHymnalRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/my-list': typeof AuthenticatedMyListRoute
   '/playlists': typeof AuthenticatedPlaylistsRouteWithChildren
+  '/prayer': typeof AuthenticatedPrayerRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/subscriptions': typeof AuthenticatedSubscriptionsRoute
@@ -220,11 +236,13 @@ export interface FileRoutesById {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/_authenticated/events': typeof AuthenticatedEventsRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/hymnal': typeof AuthenticatedHymnalRoute
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
   '/_authenticated/my-list': typeof AuthenticatedMyListRoute
   '/_authenticated/playlists': typeof AuthenticatedPlaylistsRouteWithChildren
+  '/_authenticated/prayer': typeof AuthenticatedPrayerRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/subscriptions': typeof AuthenticatedSubscriptionsRoute
@@ -247,11 +265,13 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin'
+    | '/events'
     | '/history'
     | '/hymnal'
     | '/library'
     | '/my-list'
     | '/playlists'
+    | '/prayer'
     | '/profile'
     | '/settings'
     | '/subscriptions'
@@ -271,11 +291,13 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/events'
     | '/history'
     | '/hymnal'
     | '/library'
     | '/my-list'
     | '/playlists'
+    | '/prayer'
     | '/profile'
     | '/settings'
     | '/subscriptions'
@@ -297,11 +319,13 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/admin'
+    | '/_authenticated/events'
     | '/_authenticated/history'
     | '/_authenticated/hymnal'
     | '/_authenticated/library'
     | '/_authenticated/my-list'
     | '/_authenticated/playlists'
+    | '/_authenticated/prayer'
     | '/_authenticated/profile'
     | '/_authenticated/settings'
     | '/_authenticated/subscriptions'
@@ -401,6 +425,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/prayer': {
+      id: '/_authenticated/prayer'
+      path: '/prayer'
+      fullPath: '/prayer'
+      preLoaderRoute: typeof AuthenticatedPrayerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/playlists': {
       id: '/_authenticated/playlists'
       path: '/playlists'
@@ -434,6 +465,13 @@ declare module '@tanstack/react-router' {
       path: '/history'
       fullPath: '/history'
       preLoaderRoute: typeof AuthenticatedHistoryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/events': {
+      id: '/_authenticated/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof AuthenticatedEventsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin': {
@@ -531,11 +569,13 @@ const AuthenticatedPlaylistsRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
+  AuthenticatedEventsRoute: typeof AuthenticatedEventsRoute
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
   AuthenticatedHymnalRoute: typeof AuthenticatedHymnalRoute
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
   AuthenticatedMyListRoute: typeof AuthenticatedMyListRoute
   AuthenticatedPlaylistsRoute: typeof AuthenticatedPlaylistsRouteWithChildren
+  AuthenticatedPrayerRoute: typeof AuthenticatedPrayerRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSubscriptionsRoute: typeof AuthenticatedSubscriptionsRoute
@@ -544,11 +584,13 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
+  AuthenticatedEventsRoute: AuthenticatedEventsRoute,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
   AuthenticatedHymnalRoute: AuthenticatedHymnalRoute,
   AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
   AuthenticatedMyListRoute: AuthenticatedMyListRoute,
   AuthenticatedPlaylistsRoute: AuthenticatedPlaylistsRouteWithChildren,
+  AuthenticatedPrayerRoute: AuthenticatedPrayerRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSubscriptionsRoute: AuthenticatedSubscriptionsRoute,
