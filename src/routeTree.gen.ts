@@ -19,6 +19,7 @@ import { Route as PTokenRouteImport } from './routes/p.$token'
 import { Route as AuthenticatedTvRouteImport } from './routes/_authenticated/tv'
 import { Route as AuthenticatedSubscriptionsRouteImport } from './routes/_authenticated/subscriptions'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedServicesRouteImport } from './routes/_authenticated/services'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedPrayerRouteImport } from './routes/_authenticated/prayer'
 import { Route as AuthenticatedPlaylistsRouteImport } from './routes/_authenticated/playlists'
@@ -26,6 +27,7 @@ import { Route as AuthenticatedMyListRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
 import { Route as AuthenticatedHymnalRouteImport } from './routes/_authenticated/hymnal'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
+import { Route as AuthenticatedGroupsRouteImport } from './routes/_authenticated/groups'
 import { Route as AuthenticatedEventsRouteImport } from './routes/_authenticated/events'
 import { Route as AuthenticatedAnnouncementsRouteImport } from './routes/_authenticated/announcements'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -88,6 +90,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedServicesRoute = AuthenticatedServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -121,6 +128,11 @@ const AuthenticatedHymnalRoute = AuthenticatedHymnalRouteImport.update({
 const AuthenticatedHistoryRoute = AuthenticatedHistoryRouteImport.update({
   id: '/history',
   path: '/history',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedGroupsRoute = AuthenticatedGroupsRouteImport.update({
+  id: '/groups',
+  path: '/groups',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedEventsRoute = AuthenticatedEventsRouteImport.update({
@@ -196,6 +208,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/announcements': typeof AuthenticatedAnnouncementsRoute
   '/events': typeof AuthenticatedEventsRoute
+  '/groups': typeof AuthenticatedGroupsRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/hymnal': typeof AuthenticatedHymnalRoute
   '/library': typeof AuthenticatedLibraryRoute
@@ -203,6 +216,7 @@ export interface FileRoutesByFullPath {
   '/playlists': typeof AuthenticatedPlaylistsRouteWithChildren
   '/prayer': typeof AuthenticatedPrayerRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/services': typeof AuthenticatedServicesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/subscriptions': typeof AuthenticatedSubscriptionsRoute
   '/tv': typeof AuthenticatedTvRoute
@@ -224,6 +238,7 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/announcements': typeof AuthenticatedAnnouncementsRoute
   '/events': typeof AuthenticatedEventsRoute
+  '/groups': typeof AuthenticatedGroupsRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/hymnal': typeof AuthenticatedHymnalRoute
   '/library': typeof AuthenticatedLibraryRoute
@@ -231,6 +246,7 @@ export interface FileRoutesByTo {
   '/playlists': typeof AuthenticatedPlaylistsRouteWithChildren
   '/prayer': typeof AuthenticatedPrayerRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/services': typeof AuthenticatedServicesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/subscriptions': typeof AuthenticatedSubscriptionsRoute
   '/tv': typeof AuthenticatedTvRoute
@@ -255,6 +271,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/announcements': typeof AuthenticatedAnnouncementsRoute
   '/_authenticated/events': typeof AuthenticatedEventsRoute
+  '/_authenticated/groups': typeof AuthenticatedGroupsRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/hymnal': typeof AuthenticatedHymnalRoute
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
@@ -262,6 +279,7 @@ export interface FileRoutesById {
   '/_authenticated/playlists': typeof AuthenticatedPlaylistsRouteWithChildren
   '/_authenticated/prayer': typeof AuthenticatedPrayerRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/services': typeof AuthenticatedServicesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/subscriptions': typeof AuthenticatedSubscriptionsRoute
   '/_authenticated/tv': typeof AuthenticatedTvRoute
@@ -286,6 +304,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/announcements'
     | '/events'
+    | '/groups'
     | '/history'
     | '/hymnal'
     | '/library'
@@ -293,6 +312,7 @@ export interface FileRouteTypes {
     | '/playlists'
     | '/prayer'
     | '/profile'
+    | '/services'
     | '/settings'
     | '/subscriptions'
     | '/tv'
@@ -314,6 +334,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/announcements'
     | '/events'
+    | '/groups'
     | '/history'
     | '/hymnal'
     | '/library'
@@ -321,6 +342,7 @@ export interface FileRouteTypes {
     | '/playlists'
     | '/prayer'
     | '/profile'
+    | '/services'
     | '/settings'
     | '/subscriptions'
     | '/tv'
@@ -344,6 +366,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/announcements'
     | '/_authenticated/events'
+    | '/_authenticated/groups'
     | '/_authenticated/history'
     | '/_authenticated/hymnal'
     | '/_authenticated/library'
@@ -351,6 +374,7 @@ export interface FileRouteTypes {
     | '/_authenticated/playlists'
     | '/_authenticated/prayer'
     | '/_authenticated/profile'
+    | '/_authenticated/services'
     | '/_authenticated/settings'
     | '/_authenticated/subscriptions'
     | '/_authenticated/tv'
@@ -450,6 +474,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/services': {
+      id: '/_authenticated/services'
+      path: '/services'
+      fullPath: '/services'
+      preLoaderRoute: typeof AuthenticatedServicesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
       path: '/profile'
@@ -497,6 +528,13 @@ declare module '@tanstack/react-router' {
       path: '/history'
       fullPath: '/history'
       preLoaderRoute: typeof AuthenticatedHistoryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/groups': {
+      id: '/_authenticated/groups'
+      path: '/groups'
+      fullPath: '/groups'
+      preLoaderRoute: typeof AuthenticatedGroupsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/events': {
@@ -610,6 +648,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedAnnouncementsRoute: typeof AuthenticatedAnnouncementsRoute
   AuthenticatedEventsRoute: typeof AuthenticatedEventsRoute
+  AuthenticatedGroupsRoute: typeof AuthenticatedGroupsRoute
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
   AuthenticatedHymnalRoute: typeof AuthenticatedHymnalRoute
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
@@ -617,6 +656,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPlaylistsRoute: typeof AuthenticatedPlaylistsRouteWithChildren
   AuthenticatedPrayerRoute: typeof AuthenticatedPrayerRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedServicesRoute: typeof AuthenticatedServicesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSubscriptionsRoute: typeof AuthenticatedSubscriptionsRoute
   AuthenticatedTvRoute: typeof AuthenticatedTvRoute
@@ -627,6 +667,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedAnnouncementsRoute: AuthenticatedAnnouncementsRoute,
   AuthenticatedEventsRoute: AuthenticatedEventsRoute,
+  AuthenticatedGroupsRoute: AuthenticatedGroupsRoute,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
   AuthenticatedHymnalRoute: AuthenticatedHymnalRoute,
   AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
@@ -634,6 +675,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPlaylistsRoute: AuthenticatedPlaylistsRouteWithChildren,
   AuthenticatedPrayerRoute: AuthenticatedPrayerRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedServicesRoute: AuthenticatedServicesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSubscriptionsRoute: AuthenticatedSubscriptionsRoute,
   AuthenticatedTvRoute: AuthenticatedTvRoute,
